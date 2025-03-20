@@ -1,7 +1,7 @@
 """Macro transcription utilities."""
 
 from collections.abc import Iterator
-from typing import NamedTuple
+from dataclasses import dataclass
 
 from . import MacroError, Token, TokenTree
 from ._utils import TupleNewType
@@ -17,7 +17,8 @@ type MacroTranscriberItem = (
 )
 
 
-class MacroTransciberSubstitution(NamedTuple):
+@dataclass(frozen=True, slots=True)
+class MacroTransciberSubstitution:
     """A variable substitution in a transcriber."""
 
     name: str
@@ -59,7 +60,8 @@ class MacroTranscriber(TupleNewType[MacroTranscriberItem]):
                 yield from item.transcribe(match, repitition_path)
 
 
-class MacroTranscriberRepeater(NamedTuple):
+@dataclass(frozen=True, slots=True)
+class MacroTranscriberRepeater:
     """A repeated sub-transcriber."""
 
     transcriber: MacroTranscriber

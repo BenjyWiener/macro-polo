@@ -1,6 +1,6 @@
 """Utilities for parsing macro matchers from source code."""
 
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from functools import cache
 import tokenize
 from typing import cast
@@ -19,7 +19,7 @@ from ..match import (
     MacroMatcherVar,
     MacroMatcherVarType,
 )
-from ._utils import DOLLAR_TOKEN, _parse_escaped_dollar, _ParseResult
+from ._utils import DOLLAR_TOKEN, _parse_dollar_escape, _ParseResult, _replace_digraphs
 
 
 @cache
@@ -64,7 +64,7 @@ def _parse_delimited_macro_matcher(
     sub_matcher_capture = cast(list[TokenTree], match.captures['sub_matcher'])
     sub_matcher_source = sum(sub_matcher_capture, ())
 
-    if not (sub_matcher := parse_macro_matcher(sub_matcher_source)):
+    if not (sub_matcher := _parse_macro_matcher_internal(sub_matcher_source)):
         return None
 
     return _ParseResult(
@@ -167,9 +167,34 @@ def _parse_macro_matcher_repeater(
             return _ParseResult(
                 match_size=match_size,
                 value=MacroMatcherRepeater(
-                    matcher=parse_macro_matcher(sub_matcher),
+                    matcher=_parse_macro_matcher_internal(sub_matcher),
                     sep=sep,
                     mode=MacroMatcherRepeaterMode(mode_string),
+                ),
+            )
+
+    return None
+
+
+def _parse_macro_matcher_negagtive_lookahead(
+    tokens: Sequence[Token],
+) -> _ParseResult[MacroMatcherNegativeLookahead] | None:
+    """Try to parse a macro matcher negative lookahead.
+
+    Syntax:
+        `$$ ! ($($sub_matcher:tt)*)
+    """
+    match _MACRO_MATCHER_REPEATER_PARSER.match(tokens):
+        case MacroMatch(
+            size=match_size,
+            captures={'sub_matcher': sub_matcher_capture},
+        ):
+            sub_matcher = sum(cast(list[TokenTree], sub_matcher_capture), ())
+
+            return _ParseResult(
+                match_size=match_size,
+                value=MacroMatcherNegativeLookahead(
+                    *_parse_macro_matcher_internal(sub_matcher)
                 ),
             )
 
@@ -180,15 +205,17 @@ _PARSER_FUNCS = (
     _parse_delimited_macro_matcher,
     _parse_macro_matcher_var,
     _parse_macro_matcher_repeater,
-    _parse_escaped_dollar,
+    _parse_macro_matcher_negagtive_lookahead,
+    _parse_dollar_escape,
 )
 
 
-def parse_macro_matcher(source: str | Sequence[Token]) -> MacroMatcher:
-    """Parse a macro matcher from source code or a token stream."""
-    if isinstance(source, str):
-        source = tuple(lex(source))
-    tokens = SliceView(source)
+def _parse_macro_matcher_internal(tokens: Sequence[Token]) -> MacroMatcher:
+    """Parse a macro matcher from a token sequence.
+
+    Unlike `parse_macro_matcher`, this function does not perform digraph substitution.
+    """
+    tokens = SliceView(tokens)
 
     pattern: list[MacroMatcherItem] = []
 
@@ -202,3 +229,13 @@ def parse_macro_matcher(source: str | Sequence[Token]) -> MacroMatcher:
             pattern.append(tokens.popleft())
 
     return MacroMatcher(*pattern)
+
+
+def parse_macro_matcher(source: str | Iterable[Token]) -> MacroMatcher:
+    """Parse a macro matcher from source code or a token stream."""
+    if isinstance(source, str):
+        source = lex(source)
+
+    tokens = tuple(_replace_digraphs(source))
+
+    return _parse_macro_matcher_internal(tokens)

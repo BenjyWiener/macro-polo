@@ -4,6 +4,7 @@ from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from functools import cache
 import io
+from itertools import pairwise
 import tokenize
 from typing import NamedTuple
 
@@ -75,17 +76,64 @@ class Delimiter:
 
 
 def lex(source: str) -> Iterator[Token]:
-    """Create a normalized token stream from source code."""
+    """Create a simplify token stream from source code."""
     read_source_line = io.StringIO(source).readline
-    for raw_token in tokenize.generate_tokens(readline=read_source_line):
-        if raw_token.type == tokenize.ENDMARKER:
-            continue
-        if raw_token.type == tokenize.NEWLINE and raw_token.string == '':
-            # Omit implicit trailing newline
-            continue
-        yield Token(raw_token.type, raw_token.string)
+
+    # The final token will never appear as the first item in a pair, but that's okay
+    # since the last token will be ENDMARKER, which we want to strip anyway.
+    token_pairs = pairwise(
+        Token(raw_token.type, raw_token.string)
+        for raw_token in tokenize.generate_tokens(readline=read_source_line)
+        # NL (non-semantic newline) tokens can break up NEWLINE/DEDENT pairs, so we
+        # remove them here
+        if raw_token.type != tokenize.NL
+    )
+
+    for token, next_token in token_pairs:
+        match token, next_token:
+            case Token(type=tokenize.NEWLINE, string=''), _:
+                # Omit implicit trailing NEWLINE
+                continue
+            case (
+                Token(type=tokenize.NEWLINE),
+                Token(type=tokenize.INDENT | tokenize.DEDENT),
+            ):
+                # Omit NEWLINEs before INDENTs and DEDENTs to simplify matching
+                continue
+            case Token(type=tokenize.NEWLINE), _:
+                # Normalize NEWLINEs
+                yield Token(tokenize.NEWLINE, '\n')
+            case Token(type=tokenize.INDENT), _:
+                # Normalize INDENTs
+                yield Token(tokenize.INDENT, '')
+            case _:
+                yield token
+
+
+def _desimplify(tokens: Iterable[Token], *, indent: str = '    ') -> Iterator[Token]:
+    """Revert simplifications made by `lex`.
+
+    Only reverts simplifications that change semantics.
+    """
+    indentation_level = 0
+
+    for token in tokens:
+        match token:
+            case Token(type=tokenize.INDENT):
+                indentation_level += 1
+                # Insert a NEWLINE before INDENT tokens
+                yield Token(tokenize.NEWLINE, '\n')
+                # Repair indentation
+                yield Token(tokenize.INDENT, indent * indentation_level)
+            case Token(type=tokenize.DEDENT):
+                indentation_level -= 1
+                # Insert a NEWLINE before DEDENT tokens
+                yield Token(tokenize.NEWLINE, '\n')
+                yield token
+            case _:
+                yield token
 
 
 def stringify(tokens: Iterable[Token]) -> str:
     """Construct source code from a token stream."""
-    return tokenize.untokenize(tokens)
+    return tokenize.untokenize(_desimplify(tokens))

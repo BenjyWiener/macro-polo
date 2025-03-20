@@ -1,6 +1,6 @@
 """Utilities for parsing macro transcribers from source code."""
 
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 import tokenize
 from typing import cast
 
@@ -22,7 +22,7 @@ from ..transcribe import (
     MacroTranscriberItem,
     MacroTranscriberRepeater,
 )
-from ._utils import DOLLAR_TOKEN, _parse_escaped_dollar, _ParseResult
+from ._utils import DOLLAR_TOKEN, _parse_dollar_escape, _ParseResult, _replace_digraphs
 
 
 _MACRO_TRANSCRIBER_SUBSTITUTION_PARSER = MacroMatcher(
@@ -122,15 +122,16 @@ def _parse_macro_transcriber_repeater(
 _PARSER_FUNCS = [
     _parse_macro_transcriber_substitution,
     _parse_macro_transcriber_repeater,
-    _parse_escaped_dollar,
+    _parse_dollar_escape,
 ]
 
 
-def parse_macro_transcriber(source: str | Sequence[Token]) -> MacroTranscriber:
-    """Parse a macro transcriber from source code or a token stream."""
-    if isinstance(source, str):
-        source = tuple(lex(source))
-    tokens = SliceView(source)
+def _parse_macro_transcriber_internal(tokens: Sequence[Token]) -> MacroTranscriber:
+    """Parse a macro transcriber from a token sequence.
+
+    Unlike `parse_macro_transcriber`, this function does not perform digraph substitution.
+    """
+    tokens = SliceView(tokens)
 
     pattern: list[MacroTranscriberItem] = []
 
@@ -144,3 +145,13 @@ def parse_macro_transcriber(source: str | Sequence[Token]) -> MacroTranscriber:
             pattern.append(tokens.popleft())
 
     return MacroTranscriber(*pattern)
+
+
+def parse_macro_transcriber(source: str | Iterable[Token]) -> MacroTranscriber:
+    """Parse a macro transcriber from source code or a token stream."""
+    if isinstance(source, str):
+        source = tuple(lex(source))
+
+    tokens = tuple(_replace_digraphs(source))
+
+    return _parse_macro_transcriber_internal(tokens)
