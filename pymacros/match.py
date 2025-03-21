@@ -20,6 +20,7 @@ type MacroMatcherItem = (
     | DelimitedMacroMatcher
     | MacroMatcherVar
     | MacroMatcherRepeater
+    | MacroMatcherUnion
     | MacroMatcherNegativeLookahead
 )
 type MacroMatcherCapture = Token | TokenTree | list[MacroMatcherCapture]
@@ -116,6 +117,7 @@ class MacroMatcherVarType(Enum):
     NUMBER = 'number'
     STRING = 'string'
     TOKEN_TREE = 'tt'
+    EMPTY = 'empty'
 
 
 @dataclass(frozen=True, slots=True)
@@ -180,6 +182,8 @@ class MacroMatcherVar:
                 if token.type != MacroMatcherVar._token_types[self.type]:
                     return None
                 return MacroMatch(size=1, captures={self.name: token})
+            case MacroMatcherVarType.EMPTY:
+                return MacroMatch(size=0, captures={self.name: TokenTree()})
             case _:
                 assert_never(self.type)
 
@@ -207,32 +211,7 @@ class MacroMatcherRepeater:
         This is used to provide empty capture lists for matchers that match zero
         times, allowing transcribers to handle empty captures properly.
         """
-        return MacroMatcherRepeater._base_captures_from_matcher(self.matcher)
-
-    @staticmethod
-    @cache
-    def _base_captures_from_matcher(
-        matcher: MacroMatcher,
-    ) -> dict[str, MacroMatcherCapture]:
-        captures: dict[str, MacroMatcherCapture] = {}
-
-        for item in matcher:
-            match item:
-                case Token() | MacroMatcherNegativeLookahead():
-                    pass
-                case DelimitedMacroMatcher():
-                    captures.update(
-                        MacroMatcherRepeater._base_captures_from_matcher(item.matcher)
-                    )
-                case MacroMatcherVar():
-                    captures[item.name] = []
-                case MacroMatcherRepeater():
-                    for name, base_capture in item.base_captures.items():
-                        captures[name] = [base_capture]
-                case _:
-                    assert_never(item)
-
-        return captures
+        return _base_captures_from_matcher(self.matcher)
 
     def match(self, tokens: Sequence[Token]) -> MacroMatch | None:
         """Attempt to match against a token sequence."""
@@ -273,6 +252,37 @@ class MacroMatcherRepeater:
         return MacroMatch(size=start_size - len(tokens), captures=captures)
 
 
+class MacroMatcherUnion(TupleNewType[MacroMatcher]):
+    """A union of macro matchers.
+
+    The first sub-matcher to match is used.
+    """
+
+    def __new__(cls, *args):
+        """Create a new `MacroMatcherUnion`."""
+        self = super().__new__(cls, *args)
+
+        if len(args) < 1:
+            raise MacroError('Union must have at least one variant.')
+
+        captures = _base_captures_from_matcher(self[0])
+        for matcher in self:
+            if _base_captures_from_matcher(matcher) != captures:
+                raise MacroError(
+                    'All union variants must have identical capture variables at '
+                    'equiavelent nesting depths.'
+                )
+
+        return self
+
+    def match(self, tokens: Sequence[Token]) -> MacroMatch | None:
+        """Attempt to match against a token sequence."""
+        for matcher in self:
+            if match := matcher.match(tokens):
+                return match
+        return None
+
+
 class MacroMatcherNegativeLookahead(TupleNewType[MacroMatcherItem]):
     """A negative lookahead macro match.
 
@@ -290,3 +300,35 @@ class MacroMatcherNegativeLookahead(TupleNewType[MacroMatcherItem]):
         if self._matcher.match(tokens):
             return None
         return MacroMatch(size=0, captures={})
+
+
+@cache
+def _base_captures_from_matcher(
+    matcher: MacroMatcher,
+) -> dict[str, MacroMatcherCapture]:
+    """Get a set of empty captures for the given pattern.
+
+    The return value is the expected result of matching against this pattern, wrapped in
+    a zero-or-one repeater, with zero matches.
+    In other words, a dict containing an empty list for each capture variable, at the
+    appropriate nesting level.
+    """
+    captures: dict[str, MacroMatcherCapture] = {}
+
+    for item in matcher:
+        match item:
+            case Token() | MacroMatcherNegativeLookahead():
+                pass
+            case DelimitedMacroMatcher():
+                captures.update(_base_captures_from_matcher(item.matcher))
+            case MacroMatcherVar():
+                captures[item.name] = []
+            case MacroMatcherRepeater():
+                for name, base_capture in item.base_captures.items():
+                    captures[name] = [base_capture]
+            case MacroMatcherUnion():
+                captures.update(_base_captures_from_matcher(item[0]))
+            case _:
+                assert_never(item)
+
+    return captures

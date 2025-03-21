@@ -16,6 +16,7 @@ from ..match import (
     MacroMatcherNegativeLookahead,
     MacroMatcherRepeater,
     MacroMatcherRepeaterMode,
+    MacroMatcherUnion,
     MacroMatcherVar,
     MacroMatcherVarType,
 )
@@ -176,15 +177,103 @@ def _parse_macro_matcher_repeater(
     return None
 
 
+_MACRO_MATCHER_UNION_PARSER = MacroMatcher(
+    DOLLAR_TOKEN,
+    DelimitedMacroMatcher(
+        delimiter=Delimiter(
+            open_type=tokenize.OP,
+            open_string='[',
+            close_type=tokenize.OP,
+            close_string=']',
+        ),
+        matcher=MacroMatcher(
+            MacroMatcherRepeater(
+                matcher=MacroMatcher(
+                    DelimitedMacroMatcher(
+                        delimiter=Delimiter(
+                            open_type=tokenize.OP,
+                            open_string='(',
+                            close_type=tokenize.OP,
+                            close_string=')',
+                        ),
+                        matcher=MacroMatcher(
+                            MacroMatcherRepeater(
+                                matcher=MacroMatcher(
+                                    MacroMatcherVar(
+                                        'variant',
+                                        MacroMatcherVarType.TOKEN_TREE,
+                                    ),
+                                ),
+                                mode=MacroMatcherRepeaterMode.ZERO_OR_MORE,
+                            ),
+                        ),
+                    ),
+                ),
+                sep=Token(tokenize.OP, '|'),
+                mode=MacroMatcherRepeaterMode.ONE_OR_MORE,
+            )
+        ),
+    ),
+)
+
+
+def _parse_macro_matcher_union(
+    tokens: Sequence[Token],
+) -> _ParseResult[MacroMatcherUnion] | None:
+    """Try to parse a macro matcher union.
+
+    Syntax:
+        `$$ [$(($sub_matcher:tt))|+]
+    """
+    match _MACRO_MATCHER_UNION_PARSER.match(tokens):
+        case MacroMatch(
+            size=match_size,
+            captures={'variant': list(variant_captures)},
+        ):
+            variants = (
+                parse_macro_matcher(sum(variant_capture, ()))
+                for variant_capture in cast(list[list[TokenTree]], variant_captures)
+            )
+
+            return _ParseResult(
+                match_size=match_size,
+                value=MacroMatcherUnion(*variants),
+            )
+
+    return None
+
+
+_MACRO_MATCHER_NEGATIVE_LOOKAHEAD_PARSER = MacroMatcher(
+    DOLLAR_TOKEN,
+    DelimitedMacroMatcher(
+        delimiter=Delimiter(
+            open_type=tokenize.OP,
+            open_string='[',
+            close_type=tokenize.OP,
+            close_string=']',
+        ),
+        matcher=MacroMatcher(
+            Token(tokenize.OP, '!'),
+            MacroMatcherRepeater(
+                matcher=MacroMatcher(
+                    MacroMatcherVar('sub_matcher', MacroMatcherVarType.TOKEN_TREE),
+                ),
+                mode=MacroMatcherRepeaterMode.ZERO_OR_MORE,
+            ),
+        ),
+    ),
+)
+
+
 def _parse_macro_matcher_negagtive_lookahead(
     tokens: Sequence[Token],
 ) -> _ParseResult[MacroMatcherNegativeLookahead] | None:
     """Try to parse a macro matcher negative lookahead.
 
     Syntax:
-        `$$ ! ($($sub_matcher:tt)*)
+        `$$ [ ! $($sub_matcher:tt)* ]
     """
-    match _MACRO_MATCHER_REPEATER_PARSER.match(tokens):
+    match _MACRO_MATCHER_NEGATIVE_LOOKAHEAD_PARSER.match(tokens):
         case MacroMatch(
             size=match_size,
             captures={'sub_matcher': sub_matcher_capture},
@@ -205,6 +294,7 @@ _PARSER_FUNCS = (
     _parse_delimited_macro_matcher,
     _parse_macro_matcher_var,
     _parse_macro_matcher_repeater,
+    _parse_macro_matcher_union,
     _parse_macro_matcher_negagtive_lookahead,
     _parse_dollar_escape,
 )

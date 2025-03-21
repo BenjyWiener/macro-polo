@@ -85,8 +85,8 @@ def lex(source: str) -> Iterator[Token]:
         Token(raw_token.type, raw_token.string)
         for raw_token in tokenize.generate_tokens(readline=read_source_line)
         # NL (non-semantic newline) tokens can break up NEWLINE/DEDENT pairs, so we
-        # remove them here
-        if raw_token.type != tokenize.NL
+        # remove them here, along with comments.
+        if raw_token.type not in (tokenize.NL, tokenize.COMMENT)
     )
 
     for token, next_token in token_pairs:

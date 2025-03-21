@@ -2,6 +2,7 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+import tokenize
 from typing import Protocol, cast
 
 from pymacros.parse._transcribers import parse_macro_transcriber
@@ -56,24 +57,40 @@ class MacroRulesMacro(Macro):
 
     macros: dict[str, Macro] = field(default_factory=dict)
 
-    _macro_invocation_matchers = (
-        parse_macro_matcher('$name:name!($($body:tt)*)'),
-        parse_macro_matcher('$name:name![$($body:tt)*]'),
-        parse_macro_matcher('$name:name!{$($body:tt)*}'),
-        parse_macro_matcher('$name:name!: $> $($body:tt)* $<'),
+    _function_style_macro_invocation_matcher = parse_macro_matcher(
+        '$name:name!$[  (($($body:tt)*)) |([$($body:tt)*]) |({$($body:tt)*})]'
     )
 
-    _macro_rules_matcher = parse_macro_matcher(
-        'macro_rules! $name:name:'
-        ' $> $( [$($matcher:tt)*]: $> $($transcriber:tt)* $< )+ $<'
+    _block_style_macro_invocation_matcher = parse_macro_matcher(
+        '$name:name!: $> $($body:tt)* $<'
     )
 
-    def _try_match_macro_invocation(self, tokens: Sequence[Token]) -> MacroMatch | None:
-        """Try to match a macro invocation."""
-        for matcher in MacroRulesMacro._macro_invocation_matchers:
-            if match := matcher.match(tokens):
-                return match
-        return None
+    _macro_rules_declaration_matcher = parse_macro_matcher(
+        'macro_rules! $name:name: $> $($rules:tt)+ $<'
+    )
+
+    _macro_rules_rules_matcher = parse_macro_matcher(
+        '$('
+        ' [$($matcher:tt)*]: $['
+        '    ($> $($transcriber:tt)* $<)'
+        '   |($($[!$^] $transcriber:tt)* $^)'
+        ' ]'
+        ')+'
+    )
+
+    _token_tree_matcher = parse_macro_matcher('$token_tree:tt')
+
+    def _invoke_macro(self, name: str, body: Sequence[Token]) -> Sequence[Token]:
+        """Invoke a macro."""
+        macro = self.macros.get(name)
+        if macro is None:
+            raise MacroInvocationError(f'cannot find macro named {name}')
+
+        result = macro(body)
+        if result is None:
+            raise MacroError("macro invocation body didn't match expected pattern")
+
+        return result
 
     def __call__(self, tokens: Sequence[Token]) -> Sequence[Token] | None:
         """Transform a token sequence."""
@@ -83,37 +100,52 @@ class MacroRulesMacro(Macro):
         changed = False
 
         while len(tokens) > 0:
-            match self._try_match_macro_invocation(tokens):
+            match self._function_style_macro_invocation_matcher.match(tokens):
                 case MacroMatch(
                     size=match_size,
                     captures={'name': Token(string=name), 'body': body_capture},
                 ):
-                    macro = self.macros.get(name)
-                    if macro is None:
-                        raise MacroInvocationError(f'cannot find macro named {name}')
-
-                    body = sum(cast(list[TokenTree], body_capture), ())
-
-                    result = macro(body)
-                    if result is None:
-                        raise MacroError(
-                            "macro invocation body didn't match expected pattern"
-                        )
+                    result = self._invoke_macro(
+                        name, sum(cast(list[TokenTree], body_capture), ())
+                    )
 
                     output.extend(result)
                     tokens = tokens[match_size:]
                     changed = True
                     continue
 
-            match self._macro_rules_matcher.match(tokens):
+            match self._block_style_macro_invocation_matcher.match(tokens):
                 case MacroMatch(
                     size=match_size,
-                    captures={
-                        'name': Token(string=name),
-                        'matcher': list(matchers),
-                        'transcriber': list(transcribers),
-                    },
+                    captures={'name': Token(string=name), 'body': body_capture},
                 ):
+                    result = self._invoke_macro(
+                        name, sum(cast(list[TokenTree], body_capture), ())
+                    )
+
+                    output.extend(result)
+                    output.append(Token(tokenize.NEWLINE, '\n'))
+                    tokens = tokens[match_size:]
+                    changed = True
+                    continue
+
+            match self._macro_rules_declaration_matcher.match(tokens):
+                case MacroMatch(
+                    size=match_size,
+                    captures={'name': Token(string=name), 'rules': rules_capture},
+                ):
+                    rules_tokens = sum(cast(list[TokenTree], rules_capture), ())
+
+                    match self._macro_rules_rules_matcher.full_match(rules_tokens):
+                        case MacroMatch(
+                            captures={'matcher': matchers, 'transcriber': transcribers}
+                        ):
+                            pass
+                        case _:
+                            raise MacroError(
+                                f'syntax error in macro_rules declaration for {name}'
+                            )
+
                     raw_rules = zip(
                         cast(list[list[TokenTree]], matchers),
                         cast(list[list[TokenTree]], transcribers),
@@ -133,7 +165,25 @@ class MacroRulesMacro(Macro):
                     changed = True
                     continue
 
-            output.append(tokens.popleft())
+            match self._token_tree_matcher.match(tokens):
+                case MacroMatch(size=1):
+                    output.append(tokens.popleft())
+                case MacroMatch(
+                    size=match_size,
+                    captures={
+                        'token_tree': TokenTree(
+                            (open_delim, *inner_tokens, close_delim)
+                        )
+                    },
+                ):
+                    output.append(open_delim)
+                    if (transformed_inner := self(inner_tokens)) is not None:
+                        output.extend(transformed_inner)
+                        changed = True
+                    else:
+                        output.extend(inner_tokens)
+                    output.append(close_delim)
+                    tokens = tokens[match_size:]
 
         if changed:
             return output
