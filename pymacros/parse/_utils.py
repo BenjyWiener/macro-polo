@@ -1,4 +1,4 @@
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Iterable, Sequence
 import tokenize
 from typing import NamedTuple
 
