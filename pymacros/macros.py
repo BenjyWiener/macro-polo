@@ -88,8 +88,9 @@ class MacroRulesMacro(Macro):
 
         result = macro(body)
         if result is None:
-            raise MacroError("macro invocation body didn't match expected pattern")
-
+            raise MacroError(
+                f"invoking macro {name}: body didn't match expected pattern"
+            )
         return result
 
     def __call__(self, tokens: Sequence[Token]) -> Sequence[Token] | None:
