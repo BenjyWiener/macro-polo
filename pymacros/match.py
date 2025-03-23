@@ -1,11 +1,11 @@
 """Macro input pattern matching utilities."""
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from functools import cache
 import tokenize
-from typing import assert_never
+from typing import Literal, assert_never
 
 from . import Delimiter, MacroError, Token, TokenTree
 from ._utils import SliceView, TupleNewType
@@ -23,7 +23,9 @@ type MacroMatcherItem = (
     | MacroMatcherUnion
     | MacroMatcherNegativeLookahead
 )
-type MacroMatcherCapture = Token | TokenTree | list[MacroMatcherCapture]
+type MacroMatcherCapture = (
+    Token | TokenTree | list[MacroMatcherCapture] | MacroMatcherEmptyCapture
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,6 +34,23 @@ class MacroMatch:
 
     size: int
     captures: Mapping[str, MacroMatcherCapture]
+
+
+@dataclass(frozen=True, slots=True)
+class MacroMatcherEmptyCapture:
+    """An empty macro capture.
+
+    Preserves nesting depth information, primarily to enable better transcription error
+    messages.
+    """
+
+    depth: int
+
+    def __bool__(self) -> Literal[False]:
+        return False
+
+    def __iter__(self) -> Iterator[Token]:
+        yield from ()
 
 
 class MacroMatcher(TupleNewType[MacroMatcherItem]):
@@ -117,7 +136,7 @@ class MacroMatcherVarType(Enum):
     NUMBER = 'number'
     STRING = 'string'
     TOKEN_TREE = 'tt'
-    EMPTY = 'empty'
+    NULL = 'null'
 
 
 @dataclass(frozen=True, slots=True)
@@ -136,14 +155,15 @@ class MacroMatcherVar:
 
     def match(self, tokens: Sequence[Token]) -> MacroMatch | None:
         """Attempt to match against a token sequence."""
-        if len(tokens) < 1:
-            return None
-
         match self.type:
+            case MacroMatcherVarType.NULL:
+                return MacroMatch(
+                    size=0,
+                    captures={self.name: TokenTree()} if self.name != '_' else {},
+                )
+            case _ if len(tokens) < 1:
+                return None
             case MacroMatcherVarType.TOKEN_TREE:
-                if len(tokens) < 1:
-                    return None
-
                 tokens = SliceView(tokens)
 
                 first_token = tokens.popleft()
@@ -165,13 +185,20 @@ class MacroMatcherVar:
 
                 return MacroMatch(
                     size=len(matched_tokens),
-                    captures={self.name: TokenTree(*matched_tokens)},
+                    captures=(
+                        {self.name: TokenTree(*matched_tokens)}
+                        if self.name != '_'
+                        else {}
+                    ),
                 )
             case _ if Delimiter.from_token(tokens[0]):
                 # Delimiters can only be matched by TOKEN_TREE
                 return None
             case MacroMatcherVarType.TOKEN:
-                return MacroMatch(size=1, captures={self.name: tokens[0]})
+                return MacroMatch(
+                    size=1,
+                    captures={self.name: tokens[0]} if self.name != '_' else {},
+                )
             case (
                 MacroMatcherVarType.NAME
                 | MacroMatcherVarType.OP
@@ -181,9 +208,9 @@ class MacroMatcherVar:
                 token = tokens[0]
                 if token.type != MacroMatcherVar._token_types[self.type]:
                     return None
-                return MacroMatch(size=1, captures={self.name: token})
-            case MacroMatcherVarType.EMPTY:
-                return MacroMatch(size=0, captures={self.name: TokenTree()})
+                return MacroMatch(
+                    size=1, captures={self.name: token} if self.name != '_' else {}
+                )
             case _:
                 assert_never(self.type)
 
@@ -205,7 +232,7 @@ class MacroMatcherRepeater:
     sep: Token | None = None
 
     @property
-    def base_captures(self) -> Mapping[str, MacroMatcherCapture]:
+    def base_captures(self) -> Mapping[str, MacroMatcherEmptyCapture]:
         """Get a set of empty captures for this matcher.
 
         This is used to provide empty capture lists for matchers that match zero
@@ -247,7 +274,9 @@ class MacroMatcherRepeater:
             first = False
 
         if not captures:
-            return MacroMatch(size=0, captures=self.base_captures)
+            return MacroMatch(
+                size=start_size - len(tokens), captures=self.base_captures
+            )
 
         return MacroMatch(size=start_size - len(tokens), captures=captures)
 
@@ -305,7 +334,7 @@ class MacroMatcherNegativeLookahead(TupleNewType[MacroMatcherItem]):
 @cache
 def _base_captures_from_matcher(
     matcher: MacroMatcher,
-) -> dict[str, MacroMatcherCapture]:
+) -> dict[str, MacroMatcherEmptyCapture]:
     """Get a set of empty captures for the given pattern.
 
     The return value is the expected result of matching against this pattern, wrapped in
@@ -313,7 +342,7 @@ def _base_captures_from_matcher(
     In other words, a dict containing an empty list for each capture variable, at the
     appropriate nesting level.
     """
-    captures: dict[str, MacroMatcherCapture] = {}
+    captures: dict[str, MacroMatcherEmptyCapture] = {}
 
     for item in matcher:
         match item:
@@ -322,10 +351,10 @@ def _base_captures_from_matcher(
             case DelimitedMacroMatcher():
                 captures.update(_base_captures_from_matcher(item.matcher))
             case MacroMatcherVar():
-                captures[item.name] = []
+                captures[item.name] = MacroMatcherEmptyCapture(0)
             case MacroMatcherRepeater():
                 for name, base_capture in item.base_captures.items():
-                    captures[name] = [base_capture]
+                    captures[name] = MacroMatcherEmptyCapture(base_capture.depth + 1)
             case MacroMatcherUnion():
                 captures.update(_base_captures_from_matcher(item[0]))
             case _:

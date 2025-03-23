@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from . import MacroError, Token, TokenTree
 from ._utils import TupleNewType
-from .match import MacroMatch
+from .match import MacroMatch, MacroMatcherEmptyCapture
 
 
 class MacroTranscriptionError(MacroError):
@@ -34,7 +34,7 @@ class MacroTranscriber(TupleNewType[MacroTranscriberItem]):
         for item in self:
             if isinstance(item, Token):
                 yield item
-            if isinstance(item, MacroTransciberSubstitution):
+            elif isinstance(item, MacroTransciberSubstitution):
                 try:
                     capture = match.captures[item.name]
                 except KeyError:
@@ -43,11 +43,19 @@ class MacroTranscriber(TupleNewType[MacroTranscriberItem]):
                     ) from None
 
                 for index in repitition_path:
-                    if not isinstance(capture, list):
+                    if isinstance(capture, list):
+                        capture = capture[index]
+                    elif (
+                        isinstance(capture, MacroMatcherEmptyCapture)
+                        and capture.depth > 0
+                    ):
+                        capture = MacroMatcherEmptyCapture(depth=capture.depth - 1)
+                    else:
                         break
-                    capture = capture[index]
 
-                if isinstance(capture, list):
+                if isinstance(capture, list) or (
+                    isinstance(item, MacroMatcherEmptyCapture) and item.depth > 0
+                ):
                     raise MacroTranscriptionError(
                         f'macro variable {item.name!r} still repeating at this depth'
                     )
@@ -56,7 +64,7 @@ class MacroTranscriber(TupleNewType[MacroTranscriberItem]):
                     yield capture
                 elif isinstance(capture, TokenTree):
                     yield from capture
-            if isinstance(item, MacroTranscriberRepeater):
+            elif isinstance(item, MacroTranscriberRepeater):
                 yield from item.transcribe(match, repitition_path)
 
 
@@ -67,27 +75,37 @@ class MacroTranscriberRepeater:
     transcriber: MacroTranscriber
     sep: Token | None = None
 
+    def _substitutions(self) -> Iterator[str]:
+        for item in self.transcriber:
+            if isinstance(item, MacroTransciberSubstitution):
+                yield item.name
+            elif isinstance(item, MacroTranscriberRepeater):
+                yield from item._substitutions()
+
     def _calc_repititions(
         self,
         match: MacroMatch,
         repitition_path: tuple[int, ...],
     ) -> int:
-        for item in self.transcriber:
-            if isinstance(item, MacroTransciberSubstitution):
-                try:
-                    capture = match.captures[item.name]
-                except KeyError:
-                    raise MacroTranscriptionError(
-                        f'no macro variable named {item.name!r}'
-                    ) from None
+        """Calculate how many times to repeat for the given match."""
+        for name in self._substitutions():
+            try:
+                capture = match.captures[name]
+            except KeyError:
+                raise MacroTranscriptionError(
+                    f'no macro variable named {name!r}'
+                ) from None
 
-                for index in repitition_path:
-                    if not isinstance(capture, list):
-                        break
-                    capture = capture[index]
-                else:
-                    if isinstance(capture, list):
-                        return len(capture)
+            for index in repitition_path:
+                if not isinstance(capture, list):
+                    break
+                capture = capture[index]
+            else:
+                if isinstance(capture, list):
+                    return len(capture)
+
+            if isinstance(capture, MacroMatcherEmptyCapture):
+                return 0
 
         raise MacroTranscriptionError('no variables repeat at this depth')
 
