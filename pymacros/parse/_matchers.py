@@ -65,8 +65,7 @@ def _parse_delimited_macro_matcher(
     sub_matcher_capture = cast(list[TokenTree], match.captures['sub_matcher'])
     sub_matcher_source = sum(sub_matcher_capture, ())
 
-    if not (sub_matcher := _parse_macro_matcher_internal(sub_matcher_source)):
-        return None
+    sub_matcher = _parse_macro_matcher_internal(sub_matcher_source)
 
     return _ParseResult(
         match_size=match.size,
