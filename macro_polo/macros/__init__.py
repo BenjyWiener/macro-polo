@@ -5,11 +5,12 @@ from dataclasses import dataclass, field
 import tokenize
 from typing import Protocol, cast
 
-from . import MacroError, Token, TokenTree
-from ._utils import SliceView, TupleNewType
-from .match import MacroMatch, MacroMatcher
-from .parse import parse_macro_matcher, parse_macro_transcriber
-from .transcribe import MacroTranscriber
+from .. import MacroError, Token, TokenTree
+from .._utils import SliceView, TupleNewType
+from ..match import MacroMatch, MacroMatcher
+from ..parse import parse_macro_matcher, parse_macro_transcriber
+from ..transcribe import MacroTranscriber
+from .predefined import DEFAULT_NAMED_MACROS
 
 
 class MacroInvocationError(MacroError):
@@ -53,7 +54,7 @@ class MacroRulesMacro(Macro):
     Additional predefined macros can be added by passing or populating `macros`.
     """
 
-    macros: dict[str, Macro] = field(default_factory=dict)
+    macros: dict[str, Macro] = field(default_factory=DEFAULT_NAMED_MACROS.copy)
 
     _function_style_macro_invocation_matcher = parse_macro_matcher(
         '$name:name!$[  (($($body:tt)*)) |([$($body:tt)*]) |({$($body:tt)*})]'
