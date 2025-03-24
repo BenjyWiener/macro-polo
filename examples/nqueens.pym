@@ -31,50 +31,10 @@ macro_rules! nqueens:
             right: [] []
     ]:
         nqueens!(
-            @format
-            qs: $qs
+            @format_board
             qs: $qs
             board: [$curr_row $($rows)*]
         )
-
-    # Format solution
-    [
-        @format
-        qs: [$(Q $qs_counter:null)*]
-        qs: $qs:tt
-        board: [$([Q $(Q $space_counter:null)*])*]
-    ]:
-        (
-            '+-' $('=' $qs_counter)'-'* '-+\n'
-            $(
-                '| ' $('• ' $space_counter)* 'Q'
-                nqueens!(
-                    @format_end_padding
-                    qs: $qs
-                    row: [Q $(Q $space_counter)*]
-                )
-                ' |\n'
-            )*
-            '+-' $('=' $qs_counter)'-'* '-+\n'
-        )
-
-    [
-        @format_end_padding
-        qs: [Q $($qs:tt)*]
-        row: [Q $($row:tt)*]
-    ]:
-        nqueens!(
-            @format_end_padding
-            qs: [$($qs)*]
-            row: [$($row)*]
-        )
-
-    [
-        @format_end_padding
-        qs: [$(Q $space:null)*]
-        row: []
-    ]:
-        $(' •' $space)*
 
     # Row passed all checks, add another row
     [
@@ -312,4 +272,59 @@ macro_rules! nqueens:
                     [$($right_prev)*]
         )
 
-print(nqueens!(Q Q Q Q Q Q))
+    # Format solution
+    [
+        @format_board
+        qs: $qs:tt
+        board: [$first_row:tt $($rows_tail:tt)*]
+    ]:
+        (
+            nqueens!(@format_top_border qs: $qs)
+            nqueens!(@format_row qs: $qs row: $first_row)
+            $(
+                nqueens!(@format_inner_border qs: $qs)
+                nqueens!(@format_row qs: $qs row: $rows_tail)
+            )*
+            nqueens!(@format_bottom_border qs: $qs)
+        )
+
+    [@format_top_border qs: [$(Q $qs_counter:null)*]]:
+        '╭' $('───' $qs_counter)'┰'* '╮\n'
+
+    [@format_inner_border qs: [$(Q $qs_counter:null)*]]:
+        '┝' $('━━━' $qs_counter)'╋'* '┥\n'
+
+    [@format_bottom_border qs: [$(Q $qs_counter:null)*]]:
+        '╰' $('───' $qs_counter)'┸'* '╯'
+
+    [
+        @format_row
+        qs: [$(Q $qs_counter:null)*]
+        row: [Q $(Q $offset_counter:null)*]
+    ]:
+        '│' $('   ┃' $offset_counter)* ' Q ' \
+        nqueens!(@format_row_end
+            qs: [$(Q $qs_counter)*]
+            row: [Q $(Q $offset_counter)*]
+        ) \
+        '│\n'
+
+    [
+        @format_row_end
+        qs: [Q $($qs:tt)*]
+        row: [Q $($row:tt)*]
+    ]:
+        nqueens!(
+            @format_row_end
+            qs: [$($qs)*]
+            row: [$($row)*]
+        )
+
+    [
+        @format_row_end
+        qs: [$(Q $space:null)*]
+        row: []
+    ]:
+        $('┃   ' $space)*
+
+print(nqueens!(Q Q Q Q))
