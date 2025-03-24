@@ -5,12 +5,10 @@ from dataclasses import dataclass, field
 import tokenize
 from typing import Protocol, cast
 
-from pymacros.parse._transcribers import parse_macro_transcriber
-
 from . import MacroError, Token, TokenTree
 from ._utils import SliceView, TupleNewType
 from .match import MacroMatch, MacroMatcher
-from .parse import parse_macro_matcher
+from .parse import parse_macro_matcher, parse_macro_transcriber
 from .transcribe import MacroTranscriber
 
 
