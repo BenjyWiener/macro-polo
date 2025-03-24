@@ -21,3 +21,6 @@ convention = "pep257"
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
 lines-after-imports = 2
+
+[tool.pyright]
+pythonVersion = "3.12"
