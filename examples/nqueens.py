@@ -4,7 +4,9 @@
 The nqueens macro takes n `Q` tokens (unquoted), and produces a string representing an
 n x n chess board, with n queens placed such that no queen is threatening another.
 
-To see power of compile-time execution, run this file as a module
+To see power of compile-time execution, run this file as a module and compare run time
+before and after Python caches the bytecode. (Alternatively, you can  compile the script
+manually with `python3 -m compileall examples/nqueens.py`.)
 """
 
 macro_rules! nqueens:
