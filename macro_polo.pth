@@ -1,0 +1,1 @@
+import macro_polo.codec; macro_polo.codec.register()

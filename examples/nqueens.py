@@ -1,3 +1,11 @@
+# coding: macro_polo-utf-8
+"""A compile-time implementation of a solution to the N-Queens problem.
+
+The nqueens macro takes n `Q` tokens (unquoted), and produces a string representing an
+n x n chess board, with n queens placed such that no queen is threatening another.
+
+To see power of compile-time execution, run this file as a module
+"""
 
 macro_rules! nqueens:
     # Entry point
@@ -327,4 +335,4 @@ macro_rules! nqueens:
     ]:
         $('┃   ' $space)*
 
-print(nqueens!(Q Q Q Q))
+print(nqueens!(Q Q Q Q Q Q))
