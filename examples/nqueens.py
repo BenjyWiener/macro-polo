@@ -1,4 +1,4 @@
-# coding: macro_polo-utf-8
+# coding: macro_polo
 """A compile-time implementation of a solution to the N-Queens problem.
 
 The nqueens macro takes n `Q` tokens (unquoted), and produces a string representing an
