@@ -76,7 +76,15 @@ class Delimiter:
 
 
 def lex(source: str) -> Iterator[Token]:
-    """Create a simplify token stream from source code."""
+    """Create a simplified token stream from source code.
+
+    Some simplifications are applied to make matching easier:
+      - Semantically innert tokens, such as NL and COMMENT, are stripped.
+      - NEWLINE-INDENT and NEWLINE-DEDENT pairs are reduced to INDENT and DEDENT,
+        respectively. (This is reversed by `desimplify`.)
+      - INDENT and NEWLINE tokens' strings are normalized.
+      - The trailing NEWLINE and ENDMARKER are stripped.
+    """
     read_source_line = io.StringIO(source).readline
 
     # The final token will never appear as the first item in a pair, but that's okay
@@ -84,7 +92,7 @@ def lex(source: str) -> Iterator[Token]:
     token_pairs = pairwise(
         Token(raw_token.type, raw_token.string)
         for raw_token in tokenize.generate_tokens(readline=read_source_line)
-        # NL (non-semantic newline) tokens can break up NEWLINE/DEDENT pairs, so we
+        # NL (non-terminating newline) tokens can break up NEWLINE/DEDENT pairs, so we
         # remove them here, along with comments.
         if raw_token.type not in (tokenize.NL, tokenize.COMMENT)
     )
@@ -110,7 +118,7 @@ def lex(source: str) -> Iterator[Token]:
                 yield token
 
 
-def _desimplify(tokens: Iterable[Token], *, indent: str = '    ') -> Iterator[Token]:
+def desimplify(tokens: Iterable[Token], *, indent: str = '    ') -> Iterator[Token]:
     """Revert simplifications made by `lex`.
 
     Only reverts simplifications that change semantics.
@@ -136,4 +144,4 @@ def _desimplify(tokens: Iterable[Token], *, indent: str = '    ') -> Iterator[To
 
 def stringify(tokens: Iterable[Token]) -> str:
     """Construct source code from a token stream."""
-    return tokenize.untokenize(_desimplify(tokens))
+    return tokenize.untokenize(desimplify(tokens))
