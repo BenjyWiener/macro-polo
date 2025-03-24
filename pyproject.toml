@@ -16,8 +16,12 @@ build-backend = "hatchling.build"
 [tool.hatch]
 version = {path = "src/macro_polo/__init__.py"}
 
+[tool.hatch.build.targets.wheel.force-include]
+"src/macro_polo.pth" = "macro_polo.pth"
+
 [tool.ruff]
 target-version = "py312"
+exclude = ["examples"]
 
 [tool.ruff.format]
 quote-style = "single"
@@ -37,3 +41,4 @@ lines-after-imports = 2
 
 [tool.pyright]
 pythonVersion = "3.12"
+ignore = ["examples"]
