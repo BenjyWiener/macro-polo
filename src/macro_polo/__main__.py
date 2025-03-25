@@ -6,7 +6,7 @@ import sys
 from typing import cast
 
 from . import lex, stringify
-from .macros import MacroRulesMacro, SuperMacro
+from .macros.predefined import make_default_preprocessor_macro
 
 
 arg_parser = argparse.ArgumentParser(description='Expand macros in a source file')
@@ -26,7 +26,7 @@ source = (
 
 tokens = tuple(lex(source))
 
-macro = SuperMacro(MacroRulesMacro())
+macro = make_default_preprocessor_macro()
 
 output = macro(tokens)
 

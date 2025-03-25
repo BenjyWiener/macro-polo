@@ -13,10 +13,9 @@ ENCODING_NAME = 'macro_polo'
 def _decode(data: Buffer, errors: str = 'strict', *, encoding: str) -> tuple[str, int]:
     try:
         from . import lex, stringify
-        from .macros import MacroRulesMacro, SuperMacro
-        from .macros.predefined import DEFAULT_NAMED_MACROS
+        from .macros.predefined import make_default_preprocessor_macro
 
-        macro = SuperMacro(MacroRulesMacro(DEFAULT_NAMED_MACROS.copy()))
+        macro = make_default_preprocessor_macro()
 
         decoder = codecs.getdecoder(encoding)
         source, consumed = decoder(data, errors)
