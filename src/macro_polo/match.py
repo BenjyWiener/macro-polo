@@ -249,19 +249,23 @@ class MacroMatcherRepeater:
 
         first = True
         while True:
-            if not first:
-                if self.sep:
-                    if len(tokens) >= 1 and tokens[0] == self.sep:
-                        tokens.popleft()
-                    else:
-                        break
+            match_sep = not first and self.sep
 
-            match = self.matcher.match(tokens)
+            if match_sep:
+                if len(tokens) < 1 or tokens[0] != self.sep:
+                    break
+
+            match = self.matcher.match(tokens[1:] if match_sep else tokens)
 
             if match is None:
                 if first and self.mode is MacroMatcherRepeaterMode.ONE_OR_MORE:
                     return None
                 break
+
+            # Only pop sep if self.matcher matches, to prevent consuming trailing
+            # separators.
+            if match_sep:
+                tokens.popleft()
 
             tokens = tokens[match.size :]
 
