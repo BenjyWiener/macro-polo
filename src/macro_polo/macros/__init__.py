@@ -88,27 +88,27 @@ class ScanningMacro(TupleNewType[PartialMatchMacro], Macro):
                     output.extend(new_tokens)
                     tokens = tokens[match_size:]
                     changed = True
-                    continue
-
-            match self._token_tree_matcher.match(tokens):
-                case MacroMatch(size=1):
-                    output.append(tokens.popleft())
-                case MacroMatch(
-                    size=match_size,
-                    captures={
-                        'token_tree': TokenTree(
-                            (open_delim, *inner_tokens, close_delim)
-                        )
-                    },
-                ):
-                    output.append(open_delim)
-                    if (transformed_inner := self(inner_tokens)) is not None:
-                        output.extend(transformed_inner)
-                        changed = True
-                    else:
-                        output.extend(inner_tokens)
-                    output.append(close_delim)
-                    tokens = tokens[match_size:]
+                    break
+            else:
+                match self._token_tree_matcher.match(tokens):
+                    case MacroMatch(size=1):
+                        output.append(tokens.popleft())
+                    case MacroMatch(
+                        size=match_size,
+                        captures={
+                            'token_tree': TokenTree(
+                                (open_delim, *inner_tokens, close_delim)
+                            )
+                        },
+                    ):
+                        output.append(open_delim)
+                        if (transformed_inner := self(inner_tokens)) is not None:
+                            output.extend(transformed_inner)
+                            changed = True
+                        else:
+                            output.extend(inner_tokens)
+                        output.append(close_delim)
+                        tokens = tokens[match_size:]
 
         if changed:
             return output
