@@ -1,7 +1,7 @@
 """High-level macro utilities."""
 
 from abc import abstractmethod
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 import tokenize
 from typing import Protocol, cast
@@ -151,7 +151,7 @@ class MacroRulesParserMacro(PartialMatchMacro):
         '$('
         ' [$($matcher:tt)*]: $['
         '    ($> $($transcriber:tt)* $<)'
-        '   |($($[!$^] $transcriber:tt)* $^)'
+        '   |($($[!$^] $transcriber:tt)* $($^)?)'
         ' ]'
         ')+'
     )
@@ -206,7 +206,7 @@ class NamedMacroInvokerMacro(PartialMatchMacro):
     instantiated).
     """
 
-    macros: dict[str, Macro] = field(default_factory=dict)
+    macros: Mapping[str, Macro] = field(default_factory=dict)
 
     _function_style_macro_invocation_matcher = parse_macro_matcher(
         '$name:name!$[(($($body:tt)*)) | ([$($body:tt)*]) | ({$($body:tt)*})]'
