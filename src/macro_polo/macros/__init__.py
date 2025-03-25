@@ -11,7 +11,6 @@ from .._utils import SliceView, TupleNewType
 from ..match import MacroMatch, MacroMatcher
 from ..parse import parse_macro_matcher, parse_macro_transcriber
 from ..transcribe import MacroTranscriber
-from .predefined import DEFAULT_NAMED_MACROS
 
 
 class MacroInvocationError(MacroError):
