@@ -2,10 +2,10 @@
 
 
 macro_rules! bijection:
-    [$($key:tt: $val:tt),*]:
+    [$($key:tt: $val:tt),* $(,)?]:
         (
             {$($key: $val),*},
-            {$($val: $key),*},
+            {$($val: $key),*}
         )
 
 
