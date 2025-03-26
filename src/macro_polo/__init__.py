@@ -11,7 +11,7 @@ from typing import NamedTuple
 from ._utils import TupleNewType
 
 
-__version__ = '0.1.1'
+__version__ = '0.1.0'
 
 
 class MacroError(Exception):
