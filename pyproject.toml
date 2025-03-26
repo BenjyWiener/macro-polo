@@ -8,8 +8,14 @@ authors = [
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
     "Operating System :: OS Independent",
+    "Development Status :: 3 - Alpha",
+    "Topic :: Software Development :: Pre-processors",
 ]
+keywords = ["macros", "rust", "preprocessor"]
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
