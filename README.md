@@ -56,7 +56,7 @@ debug_print!(colors_to_names[(0, 0, 1)])
 ```
 
 ```
-macro-polo % python3 examples/bijection.py
+$ python3 examples/bijection.py
 names_to_colors  => {'red': (1, 0, 0), 'green': (0, 1, 0), 'blue': (0, 0, 1)}
 colors_to_names  => {(1, 0, 0): 'red', (0, 1, 0): 'green', (0, 0, 1): 'blue'}
 names_to_colors ['green'] => (0, 1, 0)
@@ -424,7 +424,7 @@ Note that f-strings come in *many* forms: `f'...'`, `rf"""..."""`, `Fr'''...'''`
     If we use run `macro_polo` directly to check the code being emitted, we see something
     strange:
     ```
-    % python3 -m macro_polo negative_lookahead_naive.py
+    $ python3 -m macro_polo negative_lookahead_naive.py
     if 1 :print (1 );if 2 :print (2 )
     ```
     The input is left completely unchanged!
@@ -447,7 +447,7 @@ Note that f-strings come in *many* forms: `f'...'`, `rf"""..."""`, `Fr'''...'''`
     Notice the addition of `$[!;]` before `$line:tt`.
     Now when we run this code, we get the output we expected:
     ```
-    % python3 examples/negative_lookahead.py
+    $ python3 examples/negative_lookahead.py
     1
     2
     ```
