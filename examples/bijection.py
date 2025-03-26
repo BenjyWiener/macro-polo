@@ -1,4 +1,5 @@
 # coding: macro_polo
+"""A basic demonstration of `macro_rules!`."""
 
 
 macro_rules! bijection:
