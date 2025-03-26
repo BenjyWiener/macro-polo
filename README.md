@@ -141,17 +141,17 @@ macro_rules! braces_and_more:
 
     # Recurse into nested structures (except f-strings)
     [($($inner:tt)*) $($rest:tt)*]:
-      (braces_and_more!($($inner)*)) braces_and_more!($($rest)*)
+        (braces_and_more!($($inner)*)) braces_and_more!($($rest)*)
 
     [[$($inner:tt)*] $($rest:tt)*]:
-      [braces_and_more!($($inner)*)] braces_and_more!($($rest)*)
+        [braces_and_more!($($inner)*)] braces_and_more!($($rest)*)
 
     [{$($inner:tt)*} $($rest:tt)*]:
-      {braces_and_more!($($inner)*)} braces_and_more!($($rest)*)
+        {braces_and_more!($($inner)*)} braces_and_more!($($rest)*)
 
     # The special sequences `$>` and `$<` expand to INDENT and DEDENT respectively.
     [$> $($inner:tt)* $< $($rest:tt)*]:
-      $> braces_and_more!($($inner)*) $< braces_and_more!($($rest)*)
+        $> braces_and_more!($($inner)*) $< braces_and_more!($($rest)*)
 
     # Handle other tokens by leaving them unchanged
     [$t:tt $($rest:tt)*]:
