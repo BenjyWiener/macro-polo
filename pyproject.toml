@@ -1,5 +1,5 @@
 [project]
-name = "macro_polo"
+name = "macro-polo"
 description = "Rust-style macros for Python"
 dynamic = ["version"]
 requires-python = ">= 3.12"
