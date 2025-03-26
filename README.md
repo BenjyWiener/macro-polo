@@ -72,7 +72,7 @@ A more complex example, with multiple recursive match arms
 
 
 macro_rules! braces_and_more:
-    # Replace braces with indentation, using `${ ... }`` to prevent conflicts with
+    # Replace braces with indentation, using `${ ... }` to prevent conflicts with
     # other uses of curly braces, such as dicts and sets.
     # Note: due to the way Python's tokenizer works, semicolons are necessary within
     # braced blocks. We replace them with newlines (using `$^`).
