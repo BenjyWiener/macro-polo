@@ -63,6 +63,41 @@ names_to_colors ['green'] => (0, 1, 0)
 colors_to_names [(0 ,0 ,1 )] => 'blue'
 ```
 
+Viewing the generated code:
+```
+$ python3 -m macro_polo examples/bijection.py | ruff format -
+```
+```python
+names_to_colors, colors_to_names = (
+    {'red': (1, 0, 0), 'green': (0, 1, 0), 'blue': (0, 0, 1)},
+    {(1, 0, 0): 'red', (0, 1, 0): 'green', (0, 0, 1): 'blue'},
+)
+print(
+    'names_to_colors',
+    '=>',
+    repr(names_to_colors),
+    file=__import__('sys').stderr,
+)
+print(
+    'colors_to_names',
+    '=>',
+    repr(colors_to_names),
+    file=__import__('sys').stderr,
+)
+print(
+    "names_to_colors ['green']",
+    '=>',
+    repr(names_to_colors['green']),
+    file=__import__('sys').stderr,
+)
+print(
+    'colors_to_names [(0 ,0 ,1 )]',
+    '=>',
+    repr(colors_to_names[(0, 0, 1)]),
+    file=__import__('sys').stderr,
+)
+```
+
 A more complex example, with multiple recursive match arms
 ([braces_and_more.py](examples/braces_and_more.py)):
 
@@ -133,6 +168,28 @@ braces_and_more!:
             print(f'{child.name} is {size} bytes');
         }
     }
+```
+
+```
+$ python3 examples/braces_and_more.py examples
+negative_lookahead.py is 452 bytes
+nqueens.py is 9049 bytes
+bijection.py is 648 bytes
+braces_and_more.py is 2423 bytes
+counting_with_null.py is 381 bytes
+```
+
+Viewing the generated code:
+```
+$ python3 -m macro_polo examples/braces_and_more.py | ruff format -
+```
+```python
+"""A demonstration of recursive `macro_rules!`."""
+
+for child in __import__('pathlib').Path(__import__('sys').argv[1]).iterdir():
+    if child.is_file():
+        size = child.stat().st_size
+        print(f'{child.name} is {size} bytes')
 ```
 
 
