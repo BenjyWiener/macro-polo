@@ -264,9 +264,9 @@ The following constructs are supported in `macro_rules!` matchers:
         </td>
         <td>
             A negative lookahead. Matches zero tokens if <code><em>pattern</em></code>
-            <strong>fails</strong> to match.
-            If <code><em>pattern</em></code> <strong>does</strong> match, the negative
-            lookahead will fail.
+            <b>fails</b> to match.
+            If <code><em>pattern</em></code> <b>does</b> match, the negative lookahead
+            will fail.
         </td>
     </tr>
     <tr>
@@ -293,18 +293,18 @@ All other tokens are matched exactly (ex: `123` matches a `NUMBER` token with st
 
 #### Capture Variables
 
-Capture variables are patterns that, when matches, bind the matching token(s) to a name
-(unless the *`name`* is `_`).
+Capture variables are patterns that, when matched, bind the matching token(s) to a name
+(unless the `name` is `_`).
 They can then be used in a transcriber to insert the matched token(s) into the macro
 output.
 
-Capture variables consist of a *`name`* and a *`type`*. The *`name`* can be any Python
-`NAME` token. The supported *`type`*s are described in the table below:
+Capture variables consist of a `name` and a `type`. The `name` can be any Python
+`NAME` token. The supported `type`s are described in the table below:
 
 <table>
 <thead>
     <tr>
-        <th><code><em>type</em></code></th>
+        <th><code>type</code></th>
         <th>Description</th>
     </tr>
 </thead>
@@ -512,10 +512,3 @@ Note that f-strings come in *many* forms: `f'...'`, `rf"""..."""`, `Fr'''...'''`
 ## API Documentation
 
 WIP
-
-
-<style>
-code {
-    text-wrap-mode: nowrap;
-}
-</style>
