@@ -1,11 +1,11 @@
 """Macro transcription utilities."""
 
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 
 from . import MacroError, Token, TokenTree
 from ._utils import TupleNewType
-from .match import MacroMatch, MacroMatcherEmptyCapture
+from .match import MacroMatchCaptures, MacroMatcherEmptyCapture
 
 
 class MacroTranscriptionError(MacroError):
@@ -28,7 +28,7 @@ class MacroTranscriber(TupleNewType[MacroTranscriberItem]):
     """Transcribes a macro match to an output token stream."""
 
     def transcribe(
-        self, match: MacroMatch, repitition_path: tuple[int, ...] = ()
+        self, captures: MacroMatchCaptures, repitition_path: tuple[int, ...] = ()
     ) -> Iterator[Token]:
         """Transcribe the given match to an output token stream."""
         for item in self:
@@ -36,7 +36,7 @@ class MacroTranscriber(TupleNewType[MacroTranscriberItem]):
                 yield item
             elif isinstance(item, MacroTransciberSubstitution):
                 try:
-                    capture = match.captures[item.name]
+                    capture = captures[item.name]
                 except KeyError:
                     raise MacroTranscriptionError(
                         f'no macro variable named {item.name!r}'
@@ -65,7 +65,7 @@ class MacroTranscriber(TupleNewType[MacroTranscriberItem]):
                 elif isinstance(capture, TokenTree):
                     yield from capture
             elif isinstance(item, MacroTranscriberRepeater):
-                yield from item.transcribe(match, repitition_path)
+                yield from item.transcribe(captures, repitition_path)
 
 
 @dataclass(frozen=True, slots=True)
@@ -84,13 +84,13 @@ class MacroTranscriberRepeater:
 
     def _calc_repititions(
         self,
-        match: MacroMatch,
+        captures: MacroMatchCaptures,
         repitition_path: tuple[int, ...],
     ) -> int:
         """Calculate how many times to repeat for the given match."""
         for name in self._substitutions():
             try:
-                capture = match.captures[name]
+                capture = captures[name]
             except KeyError:
                 raise MacroTranscriptionError(
                     f'no macro variable named {name!r}'
@@ -110,14 +110,14 @@ class MacroTranscriberRepeater:
         raise MacroTranscriptionError('no variables repeat at this depth')
 
     def transcribe(
-        self, match: MacroMatch, repitition_path: tuple[int, ...] = ()
+        self, captures: MacroMatchCaptures, repitition_path: tuple[int, ...] = ()
     ) -> Iterator[Token]:
         """Transcribe the given match to an output token stream."""
-        for i in range(self._calc_repititions(match, repitition_path)):
+        for i in range(self._calc_repititions(captures, repitition_path)):
             if i > 0 and self.sep:
                 yield self.sep
 
             yield from self.transcriber.transcribe(
-                match,
+                captures,
                 repitition_path + (i,),
             )

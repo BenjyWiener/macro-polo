@@ -6,10 +6,10 @@ import tokenize
 
 from .. import Token, stringify
 from . import (
+    FunctionMacroInvokerMacro,
     LoopingMacro,
     Macro,
     MacroRulesParserMacro,
-    NamedMacroInvokerMacro,
     ScanningMacro,
 )
 
@@ -29,7 +29,7 @@ def debug_macro(tokens: Sequence[Token]) -> Sequence[Token] | None:
     return ()
 
 
-DEFAULT_NAMED_MACROS = {
+DEFAULT_FUNCTION_MACROS = {
     'stringify': stringify_macro,
     'debug': debug_macro,
 }
@@ -41,10 +41,10 @@ def make_default_preprocessor_macro() -> Macro:
     The returned macro has `macro_rules!` support, as well as some predefined named
     macros.
     """
-    named_macros = DEFAULT_NAMED_MACROS.copy()
+    function_macros = DEFAULT_FUNCTION_MACROS.copy()
     return LoopingMacro(
         ScanningMacro(
-            MacroRulesParserMacro(named_macros),
-            NamedMacroInvokerMacro(named_macros),
+            MacroRulesParserMacro(function_macros),
+            FunctionMacroInvokerMacro(function_macros),
         )
     )

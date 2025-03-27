@@ -26,6 +26,7 @@ type MacroMatcherItem = (
 type MacroMatcherCapture = (
     Token | TokenTree | list[MacroMatcherCapture] | MacroMatcherEmptyCapture
 )
+type MacroMatchCaptures = Mapping[str, MacroMatcherCapture]
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,7 +34,7 @@ class MacroMatch:
     """Result of a successful macro match."""
 
     size: int
-    captures: Mapping[str, MacroMatcherCapture]
+    captures: MacroMatchCaptures
 
 
 @dataclass(frozen=True, slots=True)
