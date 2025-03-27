@@ -20,7 +20,7 @@ class MultiMacro(TupleNewType[Macro], Macro):
         changed = False
 
         for macro in self:
-            if new_tokens := macro(tokens):
+            if (new_tokens := macro(tokens)) is not None:
                 tokens = new_tokens
                 changed = True
 
@@ -42,7 +42,7 @@ class LoopingMacro(TupleNewType[Macro], Macro):
 
         while True:
             for macro in self:
-                if new_tokens := macro(tokens):
+                if (new_tokens := macro(tokens)) is not None:
                     tokens = new_tokens
                     changed = True
                     break
