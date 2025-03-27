@@ -45,8 +45,8 @@ class MacroRulesParserMacro(PartialMatchMacro):
     _macro_rules_rules_matcher = parse_macro_matcher(
         '$('
         ' [$($matcher:tt)*]: $['
-        '    ($> $($transcriber:tt)* $<)'
-        '   |($($[!$^] $transcriber:tt)* $($^)?)'
+        '   ($> $($transcriber:tt)* $<)'
+        '  |($($[!$^] $transcriber:tt)* $($^)?)'
         ' ]'
         ')+'
     )
