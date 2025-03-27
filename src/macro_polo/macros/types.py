@@ -15,7 +15,7 @@ class Macro(Protocol):
         """Transform a token sequence.
 
         This method should return a new token sequence, or `None` if the input sequence
-        fails to match.
+        fails to match or should be left unchanged.
         """
 
 
@@ -31,10 +31,14 @@ class PartialMatchMacro(Protocol):
 
 
 class ParameterizedMacro(Protocol):
-    """Higher-order macro that takes a token sequence and produces a standard macro."""
+    """Macro that takes additional parameters."""
 
     @abstractmethod
     def __call__(
-        self, parameters_tokens: Sequence[Token]
-    ) -> tuple[Sequence[Token], Macro]:
-        """Produce a specialized macro using the provided parameters."""
+        self, parameters: Sequence[Token], tokens: Sequence[Token]
+    ) -> Sequence[Token] | None:
+        """Transform a token sequence.
+
+        This method should return a new token sequence, or `None` if the input sequence
+        fails to match or should be left unchanged.
+        """

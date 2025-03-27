@@ -9,13 +9,33 @@ from ..parse import parse_macro_matcher
 from .types import Macro, PartialMatchMacro
 
 
-class LoopingMacro(TupleNewType[Macro], Macro):
-    """A super-macro that applies its inner macros until none of them match."""
+class MultiMacro(TupleNewType[Macro], Macro):
+    """A super-macro that applies each of its inner macros in sequence."""
 
     def __call__(self, tokens: Sequence[Token]) -> Sequence[Token] | None:
         """Transform a token sequence.
 
-        Tries each macro in order, starting over after each match.
+        Applies each macro in `self` in sequence.
+        """
+        changed = False
+
+        for macro in self:
+            if new_tokens := macro(tokens):
+                tokens = new_tokens
+                changed = True
+
+        if changed:
+            return tokens
+        return None
+
+
+class LoopingMacro(TupleNewType[Macro], Macro):
+    """A super-macro that repeatedely applies its inner macros until none match."""
+
+    def __call__(self, tokens: Sequence[Token]) -> Sequence[Token] | None:
+        """Transform a token sequence.
+
+        Tries each macro in sequence, starting over after each match.
         Stops once none of the macros match.
         """
         changed = False
