@@ -1,6 +1,6 @@
 """Macro transcription utilities."""
 
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator
 from dataclasses import dataclass
 
 from . import MacroError, Token, TokenTree

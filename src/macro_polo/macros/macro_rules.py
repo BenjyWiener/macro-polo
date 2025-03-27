@@ -2,9 +2,8 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import cast
 
-from .. import MacroError, Token, TokenTree, TupleNewType
+from .. import MacroError, Token, TupleNewType
 from ..match import MacroMatch, MacroMatcher
 from ..parse import parse_macro_matcher, parse_macro_transcriber
 from ..transcribe import MacroTranscriber

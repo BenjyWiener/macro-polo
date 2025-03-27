@@ -3,9 +3,8 @@
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 import tokenize
-from typing import cast
 
-from .. import MacroError, Token, TokenTree
+from .. import MacroError, Token
 from ..match import MacroMatch
 from ..parse import parse_macro_matcher, parse_macro_transcriber
 from .types import Macro, PartialMatchMacro
