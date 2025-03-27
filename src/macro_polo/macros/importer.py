@@ -112,4 +112,4 @@ class ImporterMacro(ParameterizedMacro):
         else:
             self.function_macros.update(scraped_macros.function_macros)
 
-        return None
+        return tokens

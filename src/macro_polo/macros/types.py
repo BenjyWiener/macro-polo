@@ -40,5 +40,5 @@ class ParameterizedMacro(Protocol):
         """Transform a token sequence.
 
         This method should return a new token sequence, or `None` if the input sequence
-        fails to match or should be left unchanged.
+        fails to match.
         """

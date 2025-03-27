@@ -15,8 +15,16 @@ from .types import Macro, ParameterizedMacro
 class ModuleMacroInvokerMacro(Macro):
     """A macro that processes module-level macro invocations.
 
-    Module-level macros must appear at the top of the module before any other code, with
-    the exception of an optional docstring.
+    The syntax for invoking a module-level macro is `![macro_name]` or
+    `![macro_name(parameters)]`, where `parameters` is an arbitrary token sequence.
+    The `![macro_name]` syntax is equivalent to `![macro_name()]`.
+
+    When invoking a module-level macro, everything after the invocation is passed as
+    input to the macro, including other module-level macro invocations that appear later
+    in the source.
+
+    Module-level macros must appear at the top of the module before any other code (with
+    the exception of an optional docstring), with each one on its own line.
 
     Macros are defined by the `macros` mapping (which can be updated after this class is
     instantiated).
@@ -60,9 +68,13 @@ class ModuleMacroInvokerMacro(Macro):
                             f'cannot find macro named {name!r}'
                         )
 
-                    tokens = (
-                        macro(parameters, tokens[match_size:]) or tokens[match_size:]
-                    )
+                    result = macro(parameters, tokens[match_size:])
+                    if result is None:
+                        raise MacroError(
+                            f'invoking module-level macro {name!r}: '
+                            "module didn't match expected pattern"
+                        )
+                    tokens = result if result is not None else tokens[match_size:]
 
                     changed = True
                 case _:
