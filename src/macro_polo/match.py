@@ -356,7 +356,8 @@ def _base_captures_from_matcher(
             case DelimitedMacroMatcher():
                 captures.update(_base_captures_from_matcher(item.matcher))
             case MacroMatcherVar():
-                captures[item.name] = MacroMatcherEmptyCapture(0)
+                if item.name != '_':
+                    captures[item.name] = MacroMatcherEmptyCapture(0)
             case MacroMatcherRepeater():
                 for name, base_capture in item.base_captures.items():
                     captures[name] = MacroMatcherEmptyCapture(base_capture.depth + 1)
