@@ -7,9 +7,12 @@ import tokenize
 from .. import Token, stringify
 from . import (
     FunctionMacroInvokerMacro,
+    ImporterMacro,
     LoopingMacro,
     Macro,
     MacroRulesParserMacro,
+    ModuleMacroInvokerMacro,
+    MultiMacro,
     ScanningMacro,
 )
 
@@ -42,9 +45,16 @@ def make_default_preprocessor_macro() -> Macro:
     macros.
     """
     function_macros = DEFAULT_FUNCTION_MACROS.copy()
-    return LoopingMacro(
-        ScanningMacro(
-            MacroRulesParserMacro(function_macros),
-            FunctionMacroInvokerMacro(function_macros),
-        )
+    module_macros = {
+        'import': ImporterMacro(function_macros),
+    }
+
+    return MultiMacro(
+        ModuleMacroInvokerMacro(module_macros),
+        LoopingMacro(
+            ScanningMacro(
+                MacroRulesParserMacro(function_macros),
+                FunctionMacroInvokerMacro(function_macros),
+            )
+        ),
     )
