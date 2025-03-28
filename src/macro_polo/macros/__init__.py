@@ -1,5 +1,6 @@
 """High-level macro utilities."""
 
+from .decorator import DecoratorMacroInvokerMacro
 from .function import FunctionMacroInvokerMacro
 from .importer import ImporterMacro
 from .macro_rules import MacroRulesParserMacro
@@ -25,4 +26,6 @@ __all__ = [
     'MacroRulesParserMacro',
     # module
     'ModuleMacroInvokerMacro',
+    # decorator
+    'DecoratorMacroInvokerMacro',
 ]

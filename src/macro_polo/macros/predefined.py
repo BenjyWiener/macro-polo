@@ -6,6 +6,7 @@ import tokenize
 
 from .. import Token, stringify
 from . import (
+    DecoratorMacroInvokerMacro,
     FunctionMacroInvokerMacro,
     ImporterMacro,
     LoopingMacro,
@@ -13,7 +14,13 @@ from . import (
     MacroRulesParserMacro,
     ModuleMacroInvokerMacro,
     MultiMacro,
+    ParameterizedMacro,
     ScanningMacro,
+)
+from .proc import (
+    export_decorator_proc_macro,
+    export_function_proc_macro,
+    export_module_proc_macro,
 )
 
 
@@ -45,14 +52,24 @@ def make_default_preprocessor_macro() -> Macro:
     macros.
     """
     function_macros = DEFAULT_FUNCTION_MACROS.copy()
-    module_macros = {
-        'import': ImporterMacro(function_macros),
+    module_macros: dict[str, ParameterizedMacro] = {}
+    decorator_macros: dict[str, ParameterizedMacro] = {
+        'function_macro': export_function_proc_macro,
+        'module_macro': export_module_proc_macro,
+        'decorator_macro': export_decorator_proc_macro,
     }
+
+    module_macros['import'] = ImporterMacro(
+        function_macros,
+        module_macros,
+        decorator_macros,
+    )
 
     return MultiMacro(
         ModuleMacroInvokerMacro(module_macros),
         LoopingMacro(
             ScanningMacro(
+                DecoratorMacroInvokerMacro(decorator_macros),
                 MacroRulesParserMacro(function_macros),
                 FunctionMacroInvokerMacro(function_macros),
             )

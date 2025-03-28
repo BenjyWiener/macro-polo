@@ -10,6 +10,11 @@ from ..match import MacroMatch
 from ..parse import parse_macro_matcher
 from .macro_rules import MacroRulesParserMacro
 from .module import ModuleMacroInvokerMacro
+from .proc import (
+    EXPORTED_DECORATOR_MACROS_NAME,
+    EXPORTED_FUNCTION_MACROS_NAME,
+    EXPORTED_MODULE_MACROS_NAME,
+)
 from .super import MultiMacro, ScanningMacro
 from .types import Macro, ParameterizedMacro
 
@@ -17,6 +22,8 @@ from .types import Macro, ParameterizedMacro
 @dataclass(frozen=True, slots=True)
 class _ScrapedMacros:
     function_macros: dict[str, Macro] = field(default_factory=dict)
+    module_macros: dict[str, ParameterizedMacro] = field(default_factory=dict)
+    decorator_macros: dict[str, ParameterizedMacro] = field(default_factory=dict)
 
 
 def _scrape_macros(module_path: str) -> _ScrapedMacros:
@@ -42,6 +49,17 @@ def _scrape_macros(module_path: str) -> _ScrapedMacros:
 
     scraper_macro(tokens)
 
+    module = importlib.import_module(module_path)
+    scraped_macros.function_macros.update(
+        getattr(module, EXPORTED_FUNCTION_MACROS_NAME, {})
+    )
+    scraped_macros.module_macros.update(
+        getattr(module, EXPORTED_MODULE_MACROS_NAME, {})
+    )
+    scraped_macros.decorator_macros.update(
+        getattr(module, EXPORTED_DECORATOR_MACROS_NAME, {})
+    )
+
     return scraped_macros
 
 
@@ -53,6 +71,8 @@ class ImporterMacro(ParameterizedMacro):
     """
 
     function_macros: dict[str, Macro] = field(default_factory=dict)
+    module_macros: dict[str, ParameterizedMacro] = field(default_factory=dict)
+    decorator_macros: dict[str, ParameterizedMacro] = field(default_factory=dict)
 
     _parameters_matcher = parse_macro_matcher(
         '$($($members:name),+ from)? $($components:name).+'
@@ -97,6 +117,8 @@ class ImporterMacro(ParameterizedMacro):
                     member
                     for member in members
                     if member not in scraped_macros.function_macros
+                    if member not in scraped_macros.module_macros
+                    if member not in scraped_macros.decorator_macros
                 ),
                 None,
             ):
@@ -109,7 +131,23 @@ class ImporterMacro(ParameterizedMacro):
                     if name in members
                 }
             )
+            self.module_macros.update(
+                {
+                    name: macro
+                    for name, macro in scraped_macros.module_macros.items()
+                    if name in members
+                }
+            )
+            self.decorator_macros.update(
+                {
+                    name: macro
+                    for name, macro in scraped_macros.decorator_macros.items()
+                    if name in members
+                }
+            )
         else:
             self.function_macros.update(scraped_macros.function_macros)
+            self.module_macros.update(scraped_macros.module_macros)
+            self.decorator_macros.update(scraped_macros.decorator_macros)
 
         return tokens
