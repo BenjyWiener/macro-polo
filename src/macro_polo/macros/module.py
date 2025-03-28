@@ -4,11 +4,23 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 import tokenize
 
-from .. import MacroError, Token
+from .. import MacroError, Token, stringify
 from .._utils import SliceView
 from ..match import MacroMatch
 from ..parse import parse_macro_matcher, parse_macro_transcriber
 from .types import Macro, ParameterizedMacro
+
+
+def _stringify_invocation(name: str, parameters: Sequence[Token]) -> str:
+    return f'![{name}({stringify(parameters)})]'
+
+
+class ModuleMacroError(MacroError):
+    """Errors during invocation of module-level macros."""
+
+    def __init__(self, name: str, parameters: Sequence[Token], msg: str):
+        """Create a new ModuleMacroError."""
+        super().__init__(f'invoking {_stringify_invocation(name, parameters)!r}: {msg}')
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,16 +75,14 @@ class ModuleMacroInvokerMacro(Macro):
 
                     macro = self.macros.get(name)
                     if macro is None:
-                        raise MacroError(
-                            'invoking module-level macro: '
-                            f'cannot find macro named {name!r}'
+                        raise ModuleMacroError(
+                            name, parameters, f'cannot find macro named {name!r}'
                         )
 
                     result = macro(parameters, tokens[match_size:])
                     if result is None:
-                        raise MacroError(
-                            f'invoking module-level macro {name!r}: '
-                            "module didn't match expected pattern"
+                        raise ModuleMacroError(
+                            name, parameters, "module didn't match expected pattern"
                         )
                     tokens = result if result is not None else tokens[match_size:]
 
