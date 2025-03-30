@@ -8,6 +8,7 @@ class TupleNewType[T](tuple[T, ...]):
     """Helper class for creating subclasses of tuple."""
 
     def __new__(cls, *args: T) -> Self:
+        """Create a new instance of cls."""
         return super().__new__(cls, args)
 
     def __repr__(self) -> str:
