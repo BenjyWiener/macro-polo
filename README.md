@@ -18,7 +18,7 @@ The simplest way to use it is to add a `coding: macro_polo` comment to the top o
 source file (in one of the first two lines). You can then declare and invoke macros
 using the [`macro_rules!`](#macro_rules) syntax.
 
-Example ([bijection.py](examples/bijection.py)):
+Example ([bijection.py](examples/macro_rules/bijection.py)):
 
 ```python
 # coding: macro_polo
@@ -98,100 +98,6 @@ print(
 )
 ```
 
-A more complex example, with multiple recursive match arms
-([braces_and_more.py](examples/braces_and_more.py)):
-
-```python
-# coding: macro_polo
-"""A demonstration of recursive `macro_rules!`."""
-
-
-macro_rules! braces_and_more:
-    # Replace braces with indentation, using `${ ... }` to prevent conflicts with
-    # other uses of curly braces, such as dicts and sets.
-    # Note: due to the way Python's tokenizer works, semicolons are necessary within
-    # braced blocks. We replace them with newlines (using `$^`).
-    [$${
-        # This part matches 0 or more groups of non-semicolon token trees
-        $(
-            # This matches 0 or more non-semicolon token trees
-            $($[!;] $inner:tt)*
-        );*
-    } $($rest:tt)*]:
-        braces_and_more!:
-            :
-                $($($inner)*)$^*
-        braces_and_more!($($rest)*)
-
-    # Allow using names from other modules without explicitly importing them.
-    # Example: `os.path::join` becomes `__import__('os.path').path.join`
-    [$module:name$(.$submodules:name)*::$member:name $($rest:tt)*]:
-        __import__(
-            # Call stringify! on each name individually to avoid problematic spaces
-            stringify!($module) $('.' stringify!($submodules))*
-        )$(.$submodules)*.$member braces_and_more!($($rest)*)
-
-    # Allow using $NAME to access environment variables
-    [$$ $var:name $($rest:tt)*]:
-        __import__('os').environ[stringify!($var)] braces_and_more!($($rest)*)
-
-    # Allow using $NUMBER to access command line arguments
-    [$$ $index:number $($rest:tt)*]:
-        __import__('sys').argv[$index] braces_and_more!($($rest)*)
-
-    # Recurse into nested structures (except f-strings)
-    [($($inner:tt)*) $($rest:tt)*]:
-        (braces_and_more!($($inner)*)) braces_and_more!($($rest)*)
-
-    [[$($inner:tt)*] $($rest:tt)*]:
-        [braces_and_more!($($inner)*)] braces_and_more!($($rest)*)
-
-    [{$($inner:tt)*} $($rest:tt)*]:
-        {braces_and_more!($($inner)*)} braces_and_more!($($rest)*)
-
-    # The special sequences `$>` and `$<` expand to INDENT and DEDENT respectively.
-    [$> $($inner:tt)* $< $($rest:tt)*]:
-        $> braces_and_more!($($inner)*) $< braces_and_more!($($rest)*)
-
-    # Handle other tokens by leaving them unchanged
-    [$t:tt $($rest:tt)*]:
-        $t braces_and_more!($($rest)*)
-
-    # Handle empty input
-    []:
-
-
-braces_and_more!:
-    for child in pathlib::Path($1).iterdir() ${
-        if child.is_file() ${
-            size = child.stat().st_size;
-            print(f'{child.name} is {size} bytes');
-        }
-    }
-```
-
-```
-$ python3 examples/braces_and_more.py examples
-negative_lookahead.py is 452 bytes
-nqueens.py is 9049 bytes
-bijection.py is 648 bytes
-braces_and_more.py is 2423 bytes
-counting_with_null.py is 381 bytes
-```
-
-Viewing the generated code:
-```
-$ python3 -m macro_polo examples/braces_and_more.py | ruff format -
-```
-```python
-"""A demonstration of recursive `macro_rules!`."""
-
-for child in __import__('pathlib').Path(__import__('sys').argv[1]).iterdir():
-    if child.is_file():
-        size = child.stat().st_size
-        print(f'{child.name} is {size} bytes')
-```
-
 
 ### Other encodings
 
@@ -208,6 +114,22 @@ When the macro is invoked, it's input is compared to each matcher (in the order 
 they were defined). If the input macthes, the [capture variables](#capture-variables)
 are extracted and passed to the transcriber, which creates a new token sequence to
 replace the macro invocation.
+
+This is the syntax for defining a `macro_rules!` macro:
+
+<pre>
+macro_rules!:
+    [<i>matcher</i><sub>0</sub>]:
+        <i>transcriber</i><sub>0</sub>
+
+    <i>...</i>
+
+    [<i>matcher</i><sub>n</sub>]:
+        <i>transcriber</i><sub>n</sub>
+</pre>
+
+`macro_rules` macros can be recursive by transcibing a new invocation to themselves. See
+[braces_and_more.py](examples/macro_rules/braces_and_more.py) for an example.
 
 
 ### Matchers
@@ -434,8 +356,10 @@ There are five types of delimiters:
 
 Note that f-strings come in *many* forms: `f'...'`, `rf"""..."""`, `Fr'''...'''`, ....
 
-
-### Advanced Techniques
+<details>
+<summary>
+Advanced Techniques
+</summary>
 
 - #### Counting with `null`
 
@@ -508,6 +432,151 @@ Note that f-strings come in *many* forms: `f'...'`, `rf"""..."""`, `Fr'''...'''`
     1
     2
     ```
+</details>
+
+
+## Procedural Macros
+
+For more complex macros, you can define a macro as a Python function that takes a
+sequence of tokens as input and returns a new sequence of tokens as output. These are
+referred to as "procedural macros" or "proc macros".
+
+There are three types of procedural macros:
+
+1. **function-style:**
+    > _signature:_ `(tokens: Sequence[Token]) -> Sequence[Token]`
+
+    Invoked the same way as `macro_rules` macros:
+
+    `name!(input)`, `name![input]`, `name!{input}`, or
+
+    ```
+    name!:
+        input
+    ```
+
+    When invoked, the function is called with the token sequence passed as input.
+
+2. **module-level:**
+    > _signature:_ `(parameters: Sequence[Token], tokens: Sequence[Token]) -> Sequence[Token]`
+
+    Invoked with `![name(parameters)]` or `![name]` (equivalent to `![name()]`).
+    Module-level macro invocations must come before all other code (with the exception
+    of a docstring), and must each appear on their own line.
+
+    When invoked, `parameters` is the token sequence following `name`, excluding the
+    outer parentheses. `tokens` is the tokenized module starting from the line
+    immediately following the invocation.
+
+3. **decorator-style:**
+    > _signature:_ `(parameters: Sequence[Token], tokens: Sequence[Token]) -> Sequence[Token]`
+
+    Invoked with `@![name(parameters)]` or `@![name]` (equivalent to `@![name()]`).
+    Decorator-style macro invocations must immediately precede a "block", defined as
+    either a single newline-terminated line, or a line followed by an indented block.
+
+    When invoked, `parameters` is the token sequence following `name`, excluding the
+    outer parentheses. `tokens` is the tokenized block immediately following the
+    invocation.
+
+
+### Exporting and Importing Proc Macros
+
+An important thing to know about proc macros is that they cannot be invoked in the same
+module in which they are defined.
+
+Instead, you use one of the three predefined decorator macros `function_macro`,
+`module_macro`, and `decorator_macro` to mark a macro for export. You can then import it
+using the predefined `import` module macro.
+
+All three export macros take an optional `name` parameter as an alternative name to use
+when exporting the macro. By default the name of the function is used.
+
+Example [braces.py](examples/proc_macros/braces.py):
+
+```python
+# coding: macro_polo
+"""An example of a module proc macro that adds braces-support to Python."""
+
+import token
+
+from macro_polo import Token
+
+
+@![module_macro]
+def braces(parameters, tokens):
+    """Add braces support to a Python module.
+
+    The following sequences are replaced:
+    - `{:` becomes `:` followed by INDENT
+    - `:}` becomes DEDENT
+    - `;` becomes NEWLINE
+    """
+    output = []
+    i = 0
+    while i < len(tokens):
+        match tokens[i:i+2]:
+            case Token(token.OP, '{'), Token(token.OP, ':'):
+                output.append(Token(token.OP, ':'))
+                output.append(Token(token.INDENT, ''))
+                i += 2
+            case Token(token.OP, ':'), Token(token.OP, '}'):
+                output.append(Token(token.DEDENT, ''))
+                i += 2
+            case Token(token.OP, ';'), _:
+                output.append(Token(token.NEWLINE, '\n'))
+                i += 1
+            case _:
+                output.append(tokens[i])
+                i += 1
+
+    return output
+```
+
+We can then import and invoke our `braces` macro:
+
+```python
+# coding: macro_polo
+"""An example of using the `import` macro and invoking a module macro."""
+![import(braces)]
+![braces]
+
+
+for i in range(5) {:
+    print('i =', i);
+    if i % 2 == 0 {:
+        print(i, 'is divisible by 2')
+    :}
+:}
+```
+
+```
+$ python3 examples/proc_macros.py/uses_braces.py
+i = 0
+0 is divisible by 2
+i = 1
+i = 2
+2 is divisible by 2
+i = 3
+i = 4
+4 is divisible by 2
+```
+
+Practically, you'll probably want to use `macro_polo`'s lower-level machinary, instead
+of re-implementing matching and transcribing.
+
+### The `import` macro
+
+We saw an example of importing a macro from another module. By default the `import`
+macro will import all macros (including `macro_rules` macros) from the target module. If
+you want to import specific macros, you can use the alternative `![import(x, y from z)]`
+syntax.
+
+One quirk of the `import` macro is that `macro_rules` imports are transitive (if module
+`b` import a `macro_rules` macro from module `a`, and then module `c` imports `b`, the
+`macro_rules` macro from `a` will be imported into `c`.) Proc macros, however, are _not_
+transitive.
+
 
 ## API Documentation
 
