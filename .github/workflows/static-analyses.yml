@@ -15,4 +15,9 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: 3.x
-    - uses: astral-sh/ruff-action@v3.2.2
+    - name: Run ruff check
+      uses: astral-sh/ruff-action@v3.2.2
+      with:
+        version: "latest"
+    - name: Run ruff format
+      run: ruff format
