@@ -573,8 +573,8 @@ you want to import specific macros, you can use the alternative `![import(x, y f
 syntax.
 
 One quirk of the `import` macro is that `macro_rules` imports are transitive (if module
-`b` import a `macro_rules` macro from module `a`, and then module `c` imports `b`, the
-`macro_rules` macro from `a` will be imported into `c`.) Proc macros, however, are _not_
+`b` imports a `macro_rules` macro from module `a`, and then module `c` imports `b`, the
+`macro_rules` macro from `a` will be imported into `c`). Proc macros, however, are _not_
 transitive.
 
 
