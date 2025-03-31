@@ -36,7 +36,11 @@ source = "vcs"
 
 [tool.ruff]
 target-version = "py312"
-exclude = ["examples"]
+exclude = [
+    "examples",
+    "docs/conf.py",
+    "docs/**/_scripts",
+]
 
 [tool.ruff.format]
 quote-style = "single"
@@ -56,4 +60,7 @@ lines-after-imports = 2
 
 [tool.pyright]
 pythonVersion = "3.12"
-ignore = ["examples"]
+ignore = [
+    "examples",
+    "docs/**/_scripts",
+]

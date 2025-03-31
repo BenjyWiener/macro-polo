@@ -15,6 +15,8 @@ __all__ = [
     'Token',
     'TokenTree',
     'Delimiter',
+    'MacroError',
+    'TranscriptionError',
     'lex',
     'stringify',
 ]
