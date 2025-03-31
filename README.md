@@ -110,7 +110,7 @@ If you want to specify a text encoding, you can append it to `macro_polo` after 
 `macro_rules!` declarations consist of one or more rules, where each rule consists of a
 matcher and a transcriber.
 
-When the macro is invoked, it's input is compared to each matcher (in the order in which
+When the macro is invoked, its input is compared to each matcher (in the order in which
 they were defined). If the input macthes, the [capture variables](#capture-variables)
 are extracted and passed to the transcriber, which creates a new token sequence to
 replace the macro invocation.
