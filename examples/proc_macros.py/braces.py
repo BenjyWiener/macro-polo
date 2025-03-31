@@ -1,4 +1,4 @@
-# coding: macro_polo
+# coding: macro-polo
 """An example of a module proc macro that adds braces-support to Python."""
 
 import token

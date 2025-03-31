@@ -14,14 +14,14 @@ use it, I'd love to know why!
 `macro-polo` is modular, and can be extended at multiple levels. See the
 [API Documentation](#api-documentation) for more details.
 
-The simplest way to use it is to add a `coding: macro_polo` comment to the top of your
+The simplest way to use it is to add a `coding: macro-polo` comment to the top of your
 source file (in one of the first two lines). You can then declare and invoke macros
 using the [`macro_rules!`](#macro_rules) syntax.
 
 Example ([bijection.py](examples/macro_rules/bijection.py)):
 
 ```python
-# coding: macro_polo
+# coding: macro-polo
 """A basic demonstration of `macro_rules!`."""
 
 
@@ -102,7 +102,7 @@ print(
 ### Other encodings
 
 If you want to specify a text encoding, you can append it to `macro_polo` after a `-` or
-`_`, such as `# coding: macro_polo-utf-16`.
+`_`, such as `# coding: macro-polo-utf-16`.
 
 
 ## `macro_rules!`
@@ -391,7 +391,7 @@ Advanced Techniques
     Let's write a macro that replaces `;`s with newlines.
 
     ```python
-    # coding: macro_polo
+    # coding: macro-polo
 
     macro_rules! replace_semicolons_with_newlines_naive:
         [$($($line:tt)*);*]:
@@ -416,7 +416,7 @@ Advanced Techniques
     we can do with a negative lookahead:
 
     ```python
-    # coding: macro_polo
+    # coding: macro-polo
 
     macro_rules! replace_semicolons_with_newlines:
         [$($($[!;] $line:tt)*);*]:
@@ -495,7 +495,7 @@ when exporting the macro. By default the name of the function is used.
 Example [braces.py](examples/proc_macros/braces.py):
 
 ```python
-# coding: macro_polo
+# coding: macro-polo
 """An example of a module proc macro that adds braces-support to Python."""
 
 import token
@@ -536,7 +536,7 @@ def braces(parameters, tokens):
 We can then import and invoke our `braces` macro:
 
 ```python
-# coding: macro_polo
+# coding: macro-polo
 """An example of using the `import` macro and invoking a module macro."""
 ![import(braces)]
 ![braces]
