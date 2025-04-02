@@ -16,7 +16,7 @@ macro-polo
     :target: https://pypi.python.org/pypi/macro-polo
 
 .. |docs| image:: https://img.shields.io/readthedocs/macro-polo.svg
-   :target: https://macro-polo.readthedocs.io/
+   :target: https://macro-polo.readthedocs.io
 
 macro-polo brings Rust-inspired compile-time macros to Python. It's currently in very
 early alpha, but even if it ever gets a stable release, you probably shouldn't use it in
