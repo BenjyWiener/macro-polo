@@ -4,7 +4,7 @@ macro-polo
 
 *Explore new syntax!*
 
-|licence| |version| |pyversions|
+|licence| |version| |pyversions| |docs|
 
 .. |licence| image:: https://img.shields.io/badge/license-MIT-green
     :target: https://pypi.python.org/pypi/macro-polo
