@@ -23,6 +23,7 @@ license-files = ["LICENSE"]
 [project.urls]
 Homepage = "https://github.com/BenjyWiener/macro-polo"
 Repository = "https://github.com/BenjyWiener/macro-polo"
+Documentation = "https://macro-polo.readthedocs.com"
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
