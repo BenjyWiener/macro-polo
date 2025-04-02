@@ -14,7 +14,7 @@ class Macro(Protocol):
     def __call__(self, tokens: Sequence[Token]) -> Sequence[Token] | None:
         """Transform a token sequence.
 
-        This method should return a new token sequence, or `None` if the input sequence
+        This method should return a new token sequence, or ``None`` if the input sequence
         fails to match or should be left unchanged.
         """
 
@@ -39,6 +39,6 @@ class ParameterizedMacro(Protocol):
     ) -> Sequence[Token] | None:
         """Transform a token sequence.
 
-        This method should return a new token sequence, or `None` if the input sequence
+        This method should return a new token sequence, or ``None`` if the input sequence
         fails to match.
         """

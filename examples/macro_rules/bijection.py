@@ -1,4 +1,4 @@
-# coding: macro_polo
+# coding: macro-polo
 """A basic demonstration of `macro_rules!`."""
 
 

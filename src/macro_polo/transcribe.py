@@ -22,10 +22,14 @@ class MacroTransciberSubstitution:
     """A variable substitution in a transcriber."""
 
     name: str
+    """The name of the variable to substitute."""
 
 
 class MacroTranscriber(TupleNewType[MacroTranscriberItem]):
-    """Transcribes a macro match to an output token stream."""
+    """Transcribes a macro match to an output token stream.
+
+    :type args: MacroTranscriberItem
+    """
 
     def transcribe(
         self, captures: MacroMatchCaptures, repitition_path: tuple[int, ...] = ()
@@ -73,7 +77,10 @@ class MacroTranscriberRepeater:
     """A repeated sub-transcriber."""
 
     transcriber: MacroTranscriber
+    """The transcriber to repeat."""
+
     sep: Token | None = None
+    """An optional separator token."""
 
     def _substitutions(self) -> Iterator[str]:
         for item in self.transcriber:

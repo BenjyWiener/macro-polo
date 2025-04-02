@@ -20,9 +20,12 @@ arg_parser.add_argument(
 
 args = arg_parser.parse_args()
 
-source = (
-    cast(Path, args.file).read_text() if args.file is not None else sys.stdin.read()
-)
+file_path = cast(Path | None, args.file)
+
+if file_path is not None:
+    sys.path.append(str(file_path.resolve().parent))
+
+source = file_path.read_text() if file_path is not None else sys.stdin.read()
 
 tokens = tuple(lex(source))
 

@@ -14,11 +14,52 @@ from .types import Macro, PartialMatchMacro
 class FunctionMacroInvokerMacro(PartialMatchMacro):
     """A macro that processes function-like macro invocations.
 
-    Macros are defined by the `macros` mapping (which can be updated after this class is
+    The syntax for invoking a function-style macro is:
+
+    .. parsed-literal::
+
+        *macro_name*!(*input tokens*)
+
+    or
+
+    .. parsed-literal::
+
+        *macro_name*![*input tokens*]
+
+    or
+
+    .. parsed-literal::
+
+        *macro_name*!{*input tokens*}
+
+    or
+
+    .. parsed-literal::
+
+        *macro_name*!:
+            *input*
+            *tokens*
+
+    .. important::
+
+        Due to the way Python's tokenizer works, indentation and newlines are only preserved
+        by the last (block) style.
+
+    When invoked, the registered macro is called with a single argument, the token
+    sequence passed as input.
+
+    Macros are defined by :attr:`macros` (which can be updated after this class is
     instantiated).
     """
 
     macros: Mapping[str, Macro] = field(default_factory=dict)
+    """A mapping of names to function macros.
+
+    When a function macro is invoked, its name is looked up here.
+
+    This mapping may be shared with other macros, such as a
+    :class:`~macro_polo.macros.ImporterMacro`.
+    """
 
     _function_style_macro_invocation_matcher = parse_macro_matcher(
         '$name:name!$[(($($body:tt)*)) | ([$($body:tt)*]) | ({$($body:tt)*})]'

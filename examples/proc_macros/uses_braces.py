@@ -1,4 +1,4 @@
-# coding: macro_polo
+# coding: macro-polo
 """An example of using the `import` macro and invoking a module macro."""
 ![import(braces)]
 ![braces]

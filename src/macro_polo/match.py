@@ -34,7 +34,10 @@ class MacroMatch:
     """Result of a successful macro match."""
 
     size: int
+    """Number of tokens matched."""
+
     captures: MacroMatchCaptures
+    """Captured tokens."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,6 +49,7 @@ class MacroMatcherEmptyCapture:
     """
 
     depth: int
+    """Repeater nesting depth."""
 
     def __bool__(self) -> Literal[False]:
         return False
@@ -55,7 +59,10 @@ class MacroMatcherEmptyCapture:
 
 
 class MacroMatcher(TupleNewType[MacroMatcherItem]):
-    """A macro match pattern."""
+    """A macro match pattern.
+
+    :type args: MacroMatcherItem
+    """
 
     def match(self, tokens: Sequence[Token]) -> MacroMatch | None:
         """Attempt to match against a token sequence."""
@@ -96,7 +103,10 @@ class DelimitedMacroMatcher:
     """A delimited macro match pattern."""
 
     delimiter: Delimiter
+    """The delimiter to match."""
+
     matcher: MacroMatcher
+    """The inner matcher."""
 
     def match(self, tokens: Sequence[Token]) -> MacroMatch | None:
         """Attempt to match against a token sequence."""
@@ -132,12 +142,25 @@ class MacroMatcherVarType(Enum):
     """Capture-variable type."""
 
     TOKEN = 'token'
+    """Any non-delimiter token."""
+
     NAME = 'name'
+    """Any :data:`token.NAME` token."""
+
     OP = 'op'
+    """Any non-delimeter :data:`token.OP` token."""
+
     NUMBER = 'number'
+    """Any :data:`token.NUMBER` token."""
+
     STRING = 'string'
+    """Any :data:`token.STRING` token."""
+
     TOKEN_TREE = 'tt'
+    """Any non-delimiter token or a delimited sequence of tokens."""
+
     NULL = 'null'
+    """Always matches, capturing an empty :class:`~macro_polo.TokenTree`"""
 
 
 @dataclass(frozen=True, slots=True)
@@ -145,7 +168,10 @@ class MacroMatcherVar:
     """A capture-variable in a macro matcher."""
 
     name: str
+    """The name to bind captured tokens to."""
+
     type: MacroMatcherVarType
+    """The type of token(s) to match."""
 
     _token_types = {
         MacroMatcherVarType.NAME: tokenize.NAME,
@@ -220,8 +246,13 @@ class MacroMatcherRepeaterMode(Enum):
     """Matcher repeat mode."""
 
     ZERO_OR_ONE = '?'
+    """Match ≤1 times."""
+
     ZERO_OR_MORE = '*'
+    """Match ≥0 times."""
+
     ONE_OR_MORE = '+'
+    """Match ≥1 times."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -229,8 +260,13 @@ class MacroMatcherRepeater:
     """A repeated sub-matcher."""
 
     matcher: MacroMatcher
+    """The matcher to repeat."""
+
     mode: MacroMatcherRepeaterMode
+    """The repitition mode."""
+
     sep: Token | None = None
+    """An optional separator token."""
 
     @property
     def base_captures(self) -> Mapping[str, MacroMatcherEmptyCapture]:
@@ -290,6 +326,8 @@ class MacroMatcherUnion(TupleNewType[MacroMatcher]):
     """A union of macro matchers.
 
     The first sub-matcher to match is used.
+
+    :type args: MacroMatcher
     """
 
     def __new__(cls, *args):
@@ -320,8 +358,10 @@ class MacroMatcherUnion(TupleNewType[MacroMatcher]):
 class MacroMatcherNegativeLookahead(TupleNewType[MacroMatcherItem]):
     """A negative lookahead macro match.
 
-    Matches zero tokens if `MacroMatcher` would fail to match, and fails to match if
-    `MacroMatcher` would successfully match.
+    Matches zero tokens only if :class:`MacroMatcher` would fail to match, and fails to
+    match otherwise.
+
+    :type args: MacroMatcherItem
     """
 
     @property

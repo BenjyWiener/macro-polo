@@ -1,4 +1,4 @@
-# coding: macro_polo
+# coding: macro-polo
 """An example of a module proc macro that adds braces-support to Python."""
 
 import token
@@ -18,7 +18,7 @@ def braces(parameters, tokens):
     output = []
     i = 0
     while i < len(tokens):
-        match tokens[i:i+2]:
+        match tokens[i : i + 2]:
             case Token(token.OP, '{'), Token(token.OP, ':'):
                 output.append(Token(token.OP, ':'))
                 output.append(Token(token.INDENT, ''))
