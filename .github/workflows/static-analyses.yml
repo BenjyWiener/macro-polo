@@ -33,6 +33,6 @@ jobs:
         with:
           python-version: 3.x
       - name: Install docs dependencies
-        run: pip install docs/requirements.txt
+        run: pip install -r docs/requirements.txt
       - name: Run Pyright
         uses: jakebailey/pyright-action@v1
