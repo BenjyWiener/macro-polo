@@ -15,6 +15,8 @@ macro-polo
 .. |pyversions| image:: https://img.shields.io/pypi/pyversions/macro-polo.svg
     :target: https://pypi.python.org/pypi/macro-polo
 
+.. |docs| image:: https://img.shields.io/readthedocs/macro-polo.svg
+   :target: https://macro-polo.readthedocs.io/
 
 macro-polo brings Rust-inspired macros to Python, as well as a a full API for building
 custom Python preprocessors.

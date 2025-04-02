@@ -2,7 +2,21 @@
 macro-polo
 ==========
 
-Rust-style macros for Python.
+*Explore new syntax!*
+
+|licence| |version| |pyversions|
+
+.. |licence| image:: https://img.shields.io/badge/license-MIT-green
+    :target: https://pypi.python.org/pypi/macro-polo
+
+.. |version| image:: https://img.shields.io/pypi/v/macro-polo.svg
+    :target: https://pypi.python.org/pypi/macro-polo
+
+.. |pyversions| image:: https://img.shields.io/pypi/pyversions/macro-polo.svg
+    :target: https://pypi.python.org/pypi/macro-polo
+
+.. |docs| image:: https://img.shields.io/readthedocs/macro-polo.svg
+   :target: https://macro-polo.readthedocs.io/
 
 macro-polo brings Rust-inspired compile-time macros to Python. It's currently in very
 early alpha, but even if it ever gets a stable release, you probably shouldn't use it in
@@ -108,3 +122,9 @@ Viewing the generated code:
         repr(colors_to_names[(0, 0, 1)]),
         file=__import__('sys').stderr,
     )
+
+Interested?
+===========
+
+Check out the `full documentation <https://macro-polo.readthedocs.io>`_ and
+`tutorial <https://macro-polo.readthedocs.io/en/latest/intro/index.html>`_.
