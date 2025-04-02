@@ -37,6 +37,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 highlight_language = 'python'
 pygments_style = 'staroffice'
+pygments_dark_style = 'github-dark'
 
 suppress_warnings = [
     'misc.highlighting_failure',  # code with macros is not valid Python syntax
