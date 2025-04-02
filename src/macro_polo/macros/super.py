@@ -10,12 +10,15 @@ from .types import Macro, PartialMatchMacro
 
 
 class MultiMacro(TupleNewType[Macro], Macro):
-    """A super-macro that applies each of its inner macros in sequence."""
+    """A super-macro that applies each of its inner macros in sequence.
+
+    :type args: Macro
+    """
 
     def __call__(self, tokens: Sequence[Token]) -> Sequence[Token] | None:
         """Transform a token sequence.
 
-        Applies each macro in `self` in sequence.
+        Applies each macro in ``self`` in sequence.
         """
         changed = False
 
@@ -30,7 +33,10 @@ class MultiMacro(TupleNewType[Macro], Macro):
 
 
 class LoopingMacro(TupleNewType[Macro], Macro):
-    """A super-macro that repeatedely applies its inner macros until none match."""
+    """A super-macro that repeatedely applies its inner macros until none match.
+
+    :type args: Macro
+    """
 
     def __call__(self, tokens: Sequence[Token]) -> Sequence[Token] | None:
         """Transform a token sequence.
@@ -58,7 +64,9 @@ class ScanningMacro(TupleNewType[PartialMatchMacro], Macro):
     """A super-macro that scans input and applies its inner macros as they match.
 
     This macro will only perform a single pass on the input. It can be combined with
-    `LoopingMacro` to recursively expand macros.
+    :class:`LoopingMacro` to recursively expand macros.
+
+    :type args: PartialMatchMacro
     """
 
     _token_tree_matcher = parse_macro_matcher('$token_tree:tt')

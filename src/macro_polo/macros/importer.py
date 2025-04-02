@@ -67,12 +67,36 @@ def _scrape_macros(module_path: str) -> _ScrapedMacros:
 class ImporterMacro(ParameterizedMacro):
     """Imports macros from other modules.
 
-    Imported macros are added to the `function_macros` dict.
+    This macro expects its parameters to be in one of two forms:
+    1. :samp:`{module_name}`
+    2. :samp:`{macro_name1}, {macro_name2}, {...} from {module_name}`
+
+    In the first case all macros from the target module will be imported.
+
+    Imported macros are added to :attr:`function_macros`, :attr:`module_macros`, and
+    :attr:`decorator_macros` as appropriate.
     """
 
     function_macros: dict[str, Macro] = field(default_factory=dict)
+    """Imported function macros will be added to this dict.
+
+    It may be shared with other macros, such as a
+    :class:`~macro_polo.macros.FunctionMacroInvokerMacro`.
+    """
+
     module_macros: dict[str, ParameterizedMacro] = field(default_factory=dict)
+    """Imported module macros will be added to this dict.
+
+    It may be shared with other macros, such as a
+    :class:`~macro_polo.macros.ModuleMacroInvokerMacro`.
+    """
+
     decorator_macros: dict[str, ParameterizedMacro] = field(default_factory=dict)
+    """Imported decorator macros will be added to this dict.
+
+    It may be shared with other macros, such as a
+    :class:`~macro_polo.macros.DecoratorMacroInvokerMacro`.
+    """
 
     _parameters_matcher = parse_macro_matcher(
         '$($($members:name),+ from)? $($components:name).+'
@@ -81,10 +105,7 @@ class ImporterMacro(ParameterizedMacro):
     def __call__(
         self, parameters: Sequence[Token], tokens: Sequence[Token]
     ) -> Sequence[Token] | None:
-        """Import macros from the given module.
-
-        `parameters` should be a valid module path (a dot-separated list of names).
-        """
+        """Import macros from the given module."""
         match self._parameters_matcher.full_match(parameters):
             case MacroMatch(
                 captures={

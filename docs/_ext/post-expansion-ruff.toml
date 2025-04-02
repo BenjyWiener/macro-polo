@@ -1,0 +1,6 @@
+# Ruff configuration for formatting code after macro expansion
+
+target-version = "py312"
+
+[format]
+quote-style = "preserve"

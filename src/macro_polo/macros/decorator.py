@@ -16,7 +16,7 @@ def _stringify_invocation(name: str, parameters: Sequence[Token]) -> str:
 
 
 class DecoratorMacroError(MacroError):
-    """Errors during invocation of decorator-style macros."""
+    """Error during invocation of decorator-style macros."""
 
     def __init__(self, name: str, parameters: Sequence[Token], msg: str):
         """Create a new DecoratorStyleMacroError."""
@@ -27,23 +27,32 @@ class DecoratorMacroError(MacroError):
 class DecoratorMacroInvokerMacro(PartialMatchMacro):
     """A macro that processes decorator-style macro invocations.
 
-    The syntax for invoking a decorator-style macro is `!@[macro_name]` or
-    `@![macro_name(parameters)]`, where `parameters` is an arbitrary token sequence.
-    The `@![macro_name]` syntax is equivalent to `@![macro_name()]`.
+    The syntax for invoking a decorator-style macro is :samp:`@![{name}({parameters})]`
+    or :samp:`@![{name}]` (equivalent to :samp:`@![{name}()]`).
 
-    When invoking a decorator-style macro, the next non-decorator-style macro line
-    is passed as input. If the next line is followed immediately by an `INDENT`, the
-    `INDENT` and everything up to and including the matching `DEDENT` are included in
-    the input.
+    Decorator-style macro invocations must immediately precede a "block", defined as
+    either a single newline-terminated line, or a line followed by an indented block.
+
+    When invoked, the registered macro is called with two arguments:
+
+    1. :samp:`{parameters}` (as a token sequence)
+    2. the block immediately following the invocation (as a token sequence).
 
     When multiple decorator-style macros are stacked, they are invoked from bottom to
     top.
 
-    Macros are defined by the `macros` mapping (which can be updated after this class is
+    Macros are defined by :attr:`macros` (which can be updated after this class is
     instantiated).
     """
 
     macros: Mapping[str, ParameterizedMacro] = field(default_factory=dict)
+    """A mapping of names to decorator macros.
+
+    When a decorator macro is invoked, its name is looked up here.
+
+    This mapping may be shared with other macros, such as a
+    :class:`~macro_polo.macros.ImporterMacro`.
+    """
 
     _invocation_matcher = parse_macro_matcher(
         '@![$name:name $( ($($parameters:tt)*) )?] $^'

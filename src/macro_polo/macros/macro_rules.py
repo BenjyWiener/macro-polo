@@ -1,4 +1,4 @@
-"""Declarative `macro_rules` macros."""
+"""Declarative ``macro_rules`` macros."""
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
@@ -15,11 +15,17 @@ class MacroRule:
     """A macro matcher/macro transcriber pair."""
 
     matcher: MacroMatcher
+    """The rule's matcher"""
+
     transcriber: MacroTranscriber
+    """The rule's transcriber"""
 
 
 class MacroRules(TupleNewType[MacroRule], Macro):
-    """A sequence of `MacroRule`s."""
+    r"""A sequence of ``MacroRule``\ s.
+
+    :type args: MacroRule
+    """
 
     def __call__(self, tokens: Sequence[Token]) -> Sequence[Token] | None:
         """Transform a token sequence."""
@@ -31,12 +37,17 @@ class MacroRules(TupleNewType[MacroRule], Macro):
 
 @dataclass(frozen=True, slots=True)
 class MacroRulesParserMacro(PartialMatchMacro):
-    """A macro that parses `macro_rules!` macro definitions.
+    """A macro that parses ``macro_rules`` macro definitions.
 
-    Parsed macros are added to the `macros` dict.
+    Parsed macros are added to :attr:`macros`.
     """
 
     macros: dict[str, Macro] = field(default_factory=dict)
+    """Parsed ``macro_rules`` macros will be added to this dict.
+
+    It may be shared with other macros, such as a
+    :class:`~macro_polo.macros.FunctionMacroInvokerMacro`.
+    """
 
     _macro_rules_declaration_matcher = parse_macro_matcher(
         'macro_rules! $name:name: $> $($rules:tt)+ $<'

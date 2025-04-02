@@ -14,7 +14,7 @@ class RunScriptDirective(SphinxDirective):
     """Directive for displaying the output of a script."""
 
     required_arguments = 1  # File path
-    optional_arguments = 1
+    optional_arguments = 1  # Shell-quoted command line arguments
     final_argument_whitespace = True
     option_spec = {
         'cwd': Path,

@@ -24,17 +24,16 @@ Enabling macros in your project is as simple as installing ``macro-polo`` and ad
 
 .. tab:: Source
 
-      .. literalinclude:: ../examples/macro_rules/power_dict.py
+   .. literalinclude:: ../examples/macro_rules/power_dict.py
 
 .. tab:: Expanded
 
-      .. literalinclude:: ../examples/macro_rules/power_dict.py
-         :encoding: pretty-macro-polo
+   .. expandmacros:: ../examples/macro_rules/power_dict.py
 
 .. tab:: Output
 
-      .. runscript:: examples/macro_rules/power_dict.py
-         :cwd: ..
+   .. runscript:: examples/macro_rules/power_dict.py
+      :cwd: ..
 
 
 Getting Started

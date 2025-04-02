@@ -27,22 +27,30 @@ class ModuleMacroError(MacroError):
 class ModuleMacroInvokerMacro(Macro):
     """A macro that processes module-level macro invocations.
 
-    The syntax for invoking a module-level macro is `![macro_name]` or
-    `![macro_name(parameters)]`, where `parameters` is an arbitrary token sequence.
-    The `![macro_name]` syntax is equivalent to `![macro_name()]`.
+    The syntax for invoking a module-level macro is :samp:`![{name}({parameters})]` or
+    :samp:`![{name}]` (equivalent to :samp:`![{name}()]`).
 
-    When invoking a module-level macro, everything after the invocation is passed as
-    input to the macro, including other module-level macro invocations that appear later
-    in the source.
+    Module-level macro invocations must come before all other code (with the exception
+    of a docstring), and must each appear on their own line.
 
-    Module-level macros must appear at the top of the module before any other code (with
-    the exception of an optional docstring), with each one on its own line.
+    When invoked, the registered macro is called with two arguments:
 
-    Macros are defined by the `macros` mapping (which can be updated after this class is
+    1. :samp:`{parameters}` (as a token sequence)
+    2. the remainder of the module starting from the line immediately following the
+        invocation (as a token sequence).
+
+    Macros are defined by :attr:`macros` (which can be updated after this class is
     instantiated).
     """
 
     macros: Mapping[str, ParameterizedMacro] = field(default_factory=dict)
+    """A mapping of names to module macros.
+
+    When a module macro is invoked, its name is looked up here.
+
+    This mapping may be shared with other macros, such as a
+    :class:`~macro_polo.macros.ImporterMacro`.
+    """
 
     _invocation_matcher = parse_macro_matcher(
         '![$name:name $( ($($parameters:tt)*) )?] $^'

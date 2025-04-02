@@ -53,7 +53,7 @@ class Delimiter:
     @staticmethod
     @cache
     def from_token(token: Token) -> 'Delimiter | None':
-        """Attempt to create a `Delimiter` from a `Token`."""
+        """Attempt to create a :class:`Delimiter` from a :class:`Token`."""
         match token:
             case Token(type=tokenize.OP, string='('):
                 return Delimiter(*token, tokenize.OP, ')')
@@ -89,7 +89,7 @@ def lex(source: str) -> Iterator[Token]:
     Some simplifications are applied to make matching easier:
       - Semantically innert tokens, such as NL and COMMENT, are stripped.
       - NEWLINE-INDENT and NEWLINE-DEDENT pairs are reduced to INDENT and DEDENT,
-        respectively. (This is reversed by `desimplify`.)
+        respectively. (This is reversed by :func:``desimplify``.)
       - INDENT and NEWLINE tokens' strings are normalized.
       - The trailing NEWLINE and ENDMARKER are stripped.
     """
@@ -127,7 +127,7 @@ def lex(source: str) -> Iterator[Token]:
 
 
 def desimplify(tokens: Iterable[Token], *, indent: str = '    ') -> Iterator[Token]:
-    """Revert simplifications made by `lex`.
+    """Revert simplifications made by :func:``lex``.
 
     Only reverts simplifications that change semantics.
     """

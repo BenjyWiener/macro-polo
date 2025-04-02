@@ -48,7 +48,7 @@ DEFAULT_FUNCTION_MACROS = {
 def make_default_preprocessor_macro() -> Macro:
     """Create a basic preprocessor macro.
 
-    The returned macro has `macro_rules!` support, as well as some predefined named
+    The returned macro has ``macro_rules`` support, as well as some predefined named
     macros.
     """
     function_macros = DEFAULT_FUNCTION_MACROS.copy()

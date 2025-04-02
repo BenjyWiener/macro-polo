@@ -5,6 +5,6 @@ macro_rules! my_macro:
         'My first macro!'
 
     [$s:string]:
-        ('Got ' + repr($s))
+        f'Got {$s!r}'
 
-print(my_macro!('hello'))
+print(my_macro!('howdy'))
