@@ -20,15 +20,6 @@ readme = "README.rst"
 license = "MIT"
 license-files = ["LICENSE"]
 
-[project.optional-dependencies]
-docs = [
-    "ruff~=0.11.0",
-    "Sphinx~=8.2.0",
-    "sphinx-autodoc-typehints~=3.1.0",
-    "sphinx_inline_tabs==2023.4.21",
-    "sphinx-toolbox~=3.9.0",
-]
-
 [project.urls]
 Homepage = "https://github.com/BenjyWiener/macro-polo"
 Repository = "https://github.com/BenjyWiener/macro-polo"
