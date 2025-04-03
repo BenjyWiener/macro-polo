@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from enum import Enum
 from functools import cache
 import tokenize
-from typing import Literal, assert_never
+from typing import Literal, TypeAlias, Union, assert_never
 
 from . import Delimiter, MacroError, Token, TokenTree
 from ._utils import SliceView, TupleNewType
@@ -15,18 +15,25 @@ class MacroMatchError(MacroError):
     """Exception raised for macro matching errors."""
 
 
-type MacroMatcherItem = (
-    Token
-    | DelimitedMacroMatcher
-    | MacroMatcherVar
-    | MacroMatcherRepeater
-    | MacroMatcherUnion
-    | MacroMatcherNegativeLookahead
-)
-type MacroMatcherCapture = (
-    Token | TokenTree | list[MacroMatcherCapture] | MacroMatcherEmptyCapture
-)
-type MacroMatchCaptures = Mapping[str, MacroMatcherCapture]
+MacroMatcherItem: TypeAlias = Union[
+    Token,
+    'DelimitedMacroMatcher',
+    'MacroMatcherVar',
+    'MacroMatcherRepeater',
+    'MacroMatcherUnion',
+    'MacroMatcherNegativeLookahead',
+]
+"""Union of types that can appear in a :class:`MacroMatcher`."""
+
+MacroMatcherCapture: TypeAlias = Union[
+    Token,
+    TokenTree,
+    list['MacroMatcherCapture'],
+    'MacroMatcherEmptyCapture',
+]
+"""Captured token(s), possibly repeating."""
+
+MacroMatchCaptures: TypeAlias = Mapping[str, MacroMatcherCapture]
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,7 +68,7 @@ class MacroMatcherEmptyCapture:
 class MacroMatcher(TupleNewType[MacroMatcherItem]):
     """A macro match pattern.
 
-    :type args: MacroMatcherItem
+    :type args: :class:`MacroMatcherItem`
     """
 
     def match(self, tokens: Sequence[Token]) -> MacroMatch | None:
@@ -359,7 +366,7 @@ class MacroMatcherNegativeLookahead(TupleNewType[MacroMatcherItem]):
     Matches zero tokens only if :class:`MacroMatcher` would fail to match, and fails to
     match otherwise.
 
-    :type args: MacroMatcherItem
+    :type args: :class:`MacroMatcherItem`
     """
 
     @property

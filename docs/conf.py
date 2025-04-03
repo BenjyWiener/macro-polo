@@ -16,6 +16,12 @@ author = 'Benjy Wiener'
 
 # -- General configuration ---------------------------------------------------
 
+nitpicky = True
+nitpick_ignore = [
+    # autodoc has trouble with recursive type aliases
+    ('py:class', 'MacroMatcherCapture'),
+]
+
 extensions = [
     'expandmacros',
     'runscript',

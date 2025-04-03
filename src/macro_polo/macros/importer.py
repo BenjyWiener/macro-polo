@@ -81,21 +81,21 @@ class ImporterMacro(ParameterizedMacro):
     """Imported function macros will be added to this dict.
 
     It may be shared with other macros, such as a
-    :class:`~macro_polo.macros.FunctionMacroInvokerMacro`.
+    :class:`~macro_polo.macros.function.FunctionMacroInvokerMacro`.
     """
 
     module_macros: dict[str, ParameterizedMacro] = field(default_factory=dict)
     """Imported module macros will be added to this dict.
 
     It may be shared with other macros, such as a
-    :class:`~macro_polo.macros.ModuleMacroInvokerMacro`.
+    :class:`~macro_polo.macros.module.ModuleMacroInvokerMacro`.
     """
 
     decorator_macros: dict[str, ParameterizedMacro] = field(default_factory=dict)
     """Imported decorator macros will be added to this dict.
 
     It may be shared with other macros, such as a
-    :class:`~macro_polo.macros.DecoratorMacroInvokerMacro`.
+    :class:`~macro_polo.macros.decorator.DecoratorMacroInvokerMacro`.
     """
 
     _parameters_matcher = parse_macro_matcher(

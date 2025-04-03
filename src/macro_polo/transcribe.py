@@ -2,6 +2,7 @@
 
 from collections.abc import Iterator
 from dataclasses import dataclass
+from typing import TypeAlias, Union
 
 from . import MacroError, Token, TokenTree
 from ._utils import TupleNewType
@@ -12,9 +13,10 @@ class MacroTranscriptionError(MacroError):
     """Exception raised for macro transcription errors."""
 
 
-type MacroTranscriberItem = (
-    Token | MacroTransciberSubstitution | MacroTranscriberRepeater
-)
+MacroTranscriberItem: TypeAlias = Union[
+    Token, 'MacroTransciberSubstitution', 'MacroTranscriberRepeater'
+]
+"""Union of types that can appear in a :class:`MacroTranscriber`."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -28,7 +30,7 @@ class MacroTransciberSubstitution:
 class MacroTranscriber(TupleNewType[MacroTranscriberItem]):
     """Transcribes a macro match to an output token stream.
 
-    :type args: MacroTranscriberItem
+    :type args: :class:`MacroTranscriberItem`
     """
 
     def transcribe(
