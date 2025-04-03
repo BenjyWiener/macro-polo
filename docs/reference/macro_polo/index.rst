@@ -12,8 +12,9 @@
 .. toctree::
     :hidden:
 
-    macros/index
+    tokens
     match
     transcribe
     parse
+    macros/index
     codec

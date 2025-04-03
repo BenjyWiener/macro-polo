@@ -3,7 +3,7 @@
 
 import token
 
-from macro_polo import Token
+from macro_polo.tokens import Token
 
 
 @![module_macro]

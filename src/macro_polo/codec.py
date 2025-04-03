@@ -12,8 +12,8 @@ ENCODING_NAME = 'macro_polo'
 
 def _decode(data: Buffer, errors: str = 'strict', *, encoding: str) -> tuple[str, int]:
     try:
-        from . import lex, stringify
         from .macros.predefined import make_default_preprocessor_macro
+        from .tokens import lex, stringify
 
         macro = make_default_preprocessor_macro()
 

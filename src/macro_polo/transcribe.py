@@ -4,9 +4,10 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import TypeAlias, Union
 
-from . import MacroError, Token, TokenTree
+from . import MacroError
 from ._utils import TupleNewType
 from .match import MacroMatchCaptures, MacroMatcherEmptyCapture
+from .tokens import Token, TokenTree
 
 
 class MacroTranscriptionError(MacroError):

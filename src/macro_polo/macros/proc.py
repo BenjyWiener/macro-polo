@@ -4,9 +4,10 @@ from collections.abc import Sequence
 from functools import partial
 import tokenize
 
-from .. import MacroError, Token, lex, stringify
+from .. import MacroError
 from ..match import MacroMatch
 from ..parse import parse_macro_matcher
+from ..tokens import Token, lex, stringify
 
 
 EXPORTED_MACROS_NAME_TEMPLATE = '__macro_polo_exported_{}_macros__'

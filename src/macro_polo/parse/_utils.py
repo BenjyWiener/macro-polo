@@ -2,7 +2,7 @@ from collections.abc import Iterable, Sequence
 import tokenize
 from typing import NamedTuple
 
-from .. import Token
+from ..tokens import Token
 
 
 class _ParseResult[T](NamedTuple):

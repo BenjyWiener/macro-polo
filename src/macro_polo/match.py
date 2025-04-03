@@ -7,8 +7,9 @@ from functools import cache
 import tokenize
 from typing import Literal, TypeAlias, Union, assert_never
 
-from . import Delimiter, MacroError, Token, TokenTree
+from . import MacroError
 from ._utils import SliceView, TupleNewType
+from .tokens import Delimiter, Token, TokenTree
 
 
 class MacroMatchError(MacroError):
@@ -167,7 +168,7 @@ class MacroMatcherVarType(Enum):
     """Any non-delimiter token or a delimited sequence of tokens."""
 
     NULL = 'null'
-    """Always matches, capturing an empty :class:`~macro_polo.TokenTree`"""
+    """Always matches, capturing an empty :class:`~macro_polo.tokens.TokenTree`"""
 
 
 @dataclass(frozen=True, slots=True)

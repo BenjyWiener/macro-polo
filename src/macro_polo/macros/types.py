@@ -4,7 +4,7 @@ from abc import abstractmethod
 from collections.abc import Sequence
 from typing import Protocol
 
-from .. import Token
+from ..tokens import Token
 
 
 class Macro(Protocol):

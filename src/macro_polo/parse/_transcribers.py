@@ -4,7 +4,6 @@ from collections.abc import Iterable, Sequence
 import tokenize
 from typing import cast
 
-from .. import Delimiter, Token, TokenTree, lex
 from .._utils import SliceView
 from ..match import (
     DelimitedMacroMatcher,
@@ -16,6 +15,7 @@ from ..match import (
     MacroMatcherVar,
     MacroMatcherVarType,
 )
+from ..tokens import Delimiter, Token, TokenTree, lex
 from ..transcribe import (
     MacroTransciberSubstitution,
     MacroTranscriber,
