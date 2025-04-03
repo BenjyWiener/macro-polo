@@ -36,7 +36,7 @@ class ExpandMacrosDirective(SphinxDirective):
         ruff_config_path = Path(__file__).parent / 'post-expansion-ruff.toml'
         try:
             formatted = subprocess.check_output(
-                ['ruff', 'format', f'--config={ruff_config_path}', '-'],
+                ['ruff', 'format', f'--config={ruff_config_path}', '--silent', '-'],
                 input=expanded,
                 encoding=sys.getdefaultencoding(),
             )
