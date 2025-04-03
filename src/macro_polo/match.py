@@ -326,11 +326,9 @@ class MacroMatcherUnion(TupleNewType[MacroMatcher]):
     """A union of macro matchers.
 
     The first sub-matcher to match is used.
-
-    :type args: MacroMatcher
     """
 
-    def __new__(cls, *args):
+    def __new__(cls, *args: MacroMatcher):
         """Create a new `MacroMatcherUnion`."""
         self = super().__new__(cls, *args)
 
