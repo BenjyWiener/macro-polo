@@ -24,19 +24,20 @@ custom Python preprocessors.
 Enabling macros in your project is as simple as installing ``macro-polo`` and adding
 ``coding: macro-polo`` to the top of your modules:
 
-.. tab:: Source
+.. tab-set::
 
-   .. literalinclude:: ../examples/macro_rules/power_dict.py
+   .. tab-item:: Source
 
-.. tab:: Expanded
+      .. literalinclude:: ../examples/macro_rules/power_dict.py
 
-   .. expandmacros:: ../examples/macro_rules/power_dict.py
+   .. tab-item:: Expanded
 
-.. tab:: Output
+      .. expandmacros:: ../examples/macro_rules/power_dict.py
 
-   .. runscript:: examples/macro_rules/power_dict.py
-      :cwd: ..
+   .. tab-item:: Output
 
+      .. runscript:: examples/macro_rules/power_dict.py
+         :cwd: ..
 
 Getting Started
 ===============

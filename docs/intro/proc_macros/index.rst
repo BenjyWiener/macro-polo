@@ -107,18 +107,20 @@ Example:
 
 We can then import and invoke our ``braces`` macro:
 
-.. tab:: Source
+.. tab-set::
 
-    .. literalinclude:: ../../../examples/proc_macros/uses_braces.py
+    .. tab-item:: Source
 
-.. tab:: Expanded
+        .. literalinclude:: ../../../examples/proc_macros/uses_braces.py
 
-    .. expandmacros:: ../../../examples/proc_macros/uses_braces.py
+    .. tab-item:: Expanded
 
-.. tab:: Output
+        .. expandmacros:: ../../../examples/proc_macros/uses_braces.py
 
-    .. runscript:: examples/proc_macros/uses_braces.py
-        :cwd: ../../..
+    .. tab-item:: Output
+
+        .. runscript:: examples/proc_macros/uses_braces.py
+            :cwd: ../../..
 
 Practically, you'll probably want to use macro_polo's lower-level machinary, instead
 of re-implementing things like matching, transcribing, and scanning.

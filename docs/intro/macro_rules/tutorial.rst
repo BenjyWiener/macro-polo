@@ -12,31 +12,35 @@ Our First ``macro_rules``
 Let's dive right in! Create a new script named ``first_macro_rules.py`` and add the
 following:
 
-.. tab:: Source
+.. tab-set::
 
-    .. literalinclude:: _scripts/tutorial0_0.py
+    .. tab-item:: Source
 
-.. tab:: Expanded
+        .. literalinclude:: _scripts/tutorial0_0.py
 
-    .. expandmacros:: _scripts/tutorial0_0.py
+    .. tab-item:: Expanded
 
-.. tab:: Output
+        .. expandmacros:: _scripts/tutorial0_0.py
 
-    .. runscript:: _scripts/tutorial0_0.py
-        :display-name: first_macro_rules.py
+    .. tab-item:: Output
+
+        .. runscript:: _scripts/tutorial0_0.py
+            :display-name: first_macro_rules.py
 
 We defined a macro with a single rule, matching an empty *token sequence*. What if we
 try invoking it on a non-empty input?
 
-.. tab:: Source
+.. tab-set::
 
-    .. literalinclude:: _scripts/tutorial0_1.py
-        :emphasize-lines: 7
+    .. tab-item:: Source
 
-.. tab:: Output
+        .. literalinclude:: _scripts/tutorial0_1.py
+            :emphasize-lines: 7
 
-    .. runscript:: _scripts/tutorial0_1.py
-        :display-name: first_macro_rules.py
+    .. tab-item:: Output
+
+        .. runscript:: _scripts/tutorial0_1.py
+            :display-name: first_macro_rules.py
 
 We got a :class:`macro_polo.MacroError`:
 
@@ -46,19 +50,21 @@ We got a :class:`macro_polo.MacroError`:
 
 Let's add a new rule to handle this case:
 
-.. tab:: Source
+.. tab-set::
 
-    .. literalinclude:: _scripts/tutorial0_2.py
-        :emphasize-lines: 7-8
+    .. tab-item:: Source
 
-.. tab:: Expanded
+        .. literalinclude:: _scripts/tutorial0_2.py
+            :emphasize-lines: 7-8
 
-    .. expandmacros:: _scripts/tutorial0_2.py
+    .. tab-item:: Expanded
 
-.. tab:: Output
+        .. expandmacros:: _scripts/tutorial0_2.py
 
-    .. runscript:: _scripts/tutorial0_2.py
-        :display-name: first_macro_rules.py
+    .. tab-item:: Output
+
+        .. runscript:: _scripts/tutorial0_2.py
+            :display-name: first_macro_rules.py
 
 Great! But this only handles the specific token ``'hello'``. How can we handle *any*
 token?
@@ -72,19 +78,21 @@ name that we can later use in the transcriber. Capture variables have the syntax
 
 Let's modify our rule to accept any ``string`` token:
 
-.. tab:: Source
+.. tab-set::
 
-    .. literalinclude:: _scripts/tutorial0_3.py
-        :emphasize-lines: 7-8,10
+    .. tab-item:: Source
 
-.. tab:: Expanded
+        .. literalinclude:: _scripts/tutorial0_3.py
+            :emphasize-lines: 7-8,10
 
-    .. expandmacros:: _scripts/tutorial0_3.py
+    .. tab-item:: Expanded
 
-.. tab:: Output
+        .. expandmacros:: _scripts/tutorial0_3.py
 
-    .. runscript:: _scripts/tutorial0_3.py
-        :display-name: first_macro_rules.py
+    .. tab-item:: Output
+
+        .. runscript:: _scripts/tutorial0_3.py
+            :display-name: first_macro_rules.py
 
 Nice! But what if we want to accept *any number* of strings?
 
@@ -103,16 +111,18 @@ parenthesis and mode indicator.
 
 Let's see an example:
 
-.. tab:: Source
+.. tab-set::
 
-    .. literalinclude:: _scripts/tutorial0_4.py
-        :emphasize-lines: 7-8,10
+    .. tab-item:: Source
 
-.. tab:: Expanded
+        .. literalinclude:: _scripts/tutorial0_4.py
+            :emphasize-lines: 7-8,10
 
-    .. expandmacros:: _scripts/tutorial0_4.py
+    .. tab-item:: Expanded
 
-.. tab:: Output
+        .. expandmacros:: _scripts/tutorial0_4.py
 
-    .. runscript:: _scripts/tutorial0_4.py
-        :display-name: first_macro_rules.py
+    .. tab-item:: Output
+
+        .. runscript:: _scripts/tutorial0_4.py
+            :display-name: first_macro_rules.py

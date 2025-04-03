@@ -15,52 +15,58 @@ We'll do this by replacing each token tree with ``1 +`` and then ending it of wi
 
 We can write a recursive macro to recursively replace the first token tree, one-by-one:
 
-.. tab:: Source
+.. tab-set::
 
-    .. literalinclude:: _scripts/count_tts_recursive.py
+    .. tab-item:: Source
 
-.. tab:: Expanded
+        .. literalinclude:: _scripts/count_tts_recursive.py
 
-    .. expandmacros:: _scripts/count_tts_recursive.py
+    .. tab-item:: Expanded
 
-.. tab:: Output
+        .. expandmacros:: _scripts/count_tts_recursive.py
 
-    .. runscript:: count_tts_recursive.py
-        :cwd: _scripts
+    .. tab-item:: Output
+
+        .. runscript:: count_tts_recursive.py
+            :cwd: _scripts
 
 Alternatively, we can use the ``null`` capture type to "count" the number of ``tt``\ s,
 and then emit the same number of ``1 +``\ s, all in one go:
 
-.. tab:: Source
+.. tab-set::
 
-    .. literalinclude:: _scripts/count_tts_with_null.py
+    .. tab-item:: Source
 
-.. tab:: Expanded
+        .. literalinclude:: _scripts/count_tts_with_null.py
 
-    .. expandmacros:: _scripts/count_tts_with_null.py
+    .. tab-item:: Expanded
 
-.. tab:: Output
+        .. expandmacros:: _scripts/count_tts_with_null.py
 
-    .. runscript:: count_tts_with_null.py
-        :cwd: _scripts
+    .. tab-item:: Output
+
+        .. runscript:: count_tts_with_null.py
+            :cwd: _scripts
 
 Matching terminators with negative lookahead
 ============================================
 
 Let's write a macro that replaces ``;``\ s with newlines.
 
-.. tab:: Source
+.. tab-set::
 
-    .. literalinclude:: _scripts/replace_semicolons_with_newlines_naive.py
+    .. tab-item:: Source
 
-.. tab:: Expanded
+        .. literalinclude:: _scripts/replace_semicolons_with_newlines_naive.py
 
-    .. expandmacros:: _scripts/replace_semicolons_with_newlines_naive.py
+    .. tab-item:: Expanded
 
-.. tab:: Output
+        .. expandmacros:: _scripts/replace_semicolons_with_newlines_naive.py
 
-    .. runscript:: replace_semicolons_with_newlines_naive.py
-        :cwd: _scripts
+    .. tab-item:: Output
+
+        .. runscript:: replace_semicolons_with_newlines_naive.py
+            :cwd: _scripts
 
 When we try to run this, however, we get a ``SyntaxError``.
 
@@ -72,19 +78,21 @@ the semicolon, so the the entire input is captured in a single repition (of the 
 repeater). What we really want is for ``$line:tt`` to match anything *except* ``;``,
 which we can do with a negative lookahead:
 
-.. tab:: Source
+.. tab-set::
 
-    .. literalinclude:: _scripts/replace_semicolons_with_newlines.py
-        :emphasize-lines: 4
+    .. tab-item:: Source
 
-.. tab:: Expanded
+        .. literalinclude:: _scripts/replace_semicolons_with_newlines.py
+            :emphasize-lines: 4
 
-    .. expandmacros:: _scripts/replace_semicolons_with_newlines.py
+    .. tab-item:: Expanded
 
-.. tab:: Output
+        .. expandmacros:: _scripts/replace_semicolons_with_newlines.py
 
-    .. runscript:: replace_semicolons_with_newlines.py
-        :cwd: _scripts
+    .. tab-item:: Output
+
+        .. runscript:: replace_semicolons_with_newlines.py
+            :cwd: _scripts
 
 Notice the addition of ``$[!;]`` before ``$line:tt``.
 Now when we run this code, we get the output we expected.

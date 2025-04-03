@@ -22,7 +22,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
-    'sphinx_inline_tabs',
+    'sphinx_design',
     'sphinx_toolbox.more_autodoc.autoprotocol',
 ]
 
