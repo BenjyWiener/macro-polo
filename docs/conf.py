@@ -21,6 +21,7 @@ extensions = [
     'runscript',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.viewcode',
     'sphinx_inline_tabs',
     'sphinx_toolbox.more_autodoc.autoprotocol',
 ]
@@ -30,7 +31,6 @@ intersphinx_mapping = {
 }
 
 autodoc_typehints = 'description'
-autodoc_class_signature = 'separated'
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
