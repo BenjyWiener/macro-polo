@@ -4,10 +4,11 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 import tokenize
 
-from .. import MacroError, Token, stringify
+from .. import MacroError
 from .._utils import SliceView
 from ..match import MacroMatch
 from ..parse import parse_macro_matcher, parse_macro_transcriber
+from ..tokens import Token, stringify
 from .types import Macro, ParameterizedMacro
 
 

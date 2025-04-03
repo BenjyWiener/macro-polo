@@ -5,8 +5,8 @@ from pathlib import Path
 import sys
 from typing import cast
 
-from . import lex, stringify
 from .macros.predefined import make_default_preprocessor_macro
+from .tokens import lex, stringify
 
 
 arg_parser = argparse.ArgumentParser(description='Expand macros in a source file')

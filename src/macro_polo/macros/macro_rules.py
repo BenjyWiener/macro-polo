@@ -3,9 +3,10 @@
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 
-from .. import MacroError, Token, TupleNewType
+from .. import MacroError
 from ..match import MacroMatch, MacroMatcher
 from ..parse import parse_macro_matcher, parse_macro_transcriber
+from ..tokens import Token, TupleNewType
 from ..transcribe import MacroTranscriber
 from .types import Macro, PartialMatchMacro
 

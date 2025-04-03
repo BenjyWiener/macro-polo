@@ -4,7 +4,7 @@ from collections.abc import Sequence
 import sys
 import tokenize
 
-from .. import Token, stringify
+from ..tokens import Token, stringify
 from . import (
     DecoratorMacroInvokerMacro,
     FunctionMacroInvokerMacro,

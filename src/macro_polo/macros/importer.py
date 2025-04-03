@@ -5,9 +5,10 @@ from dataclasses import dataclass, field
 import importlib.util
 from typing import cast
 
-from .. import MacroError, Token, lex, stringify
+from .. import MacroError
 from ..match import MacroMatch
 from ..parse import parse_macro_matcher
+from ..tokens import Token, lex, stringify
 from .macro_rules import MacroRulesParserMacro
 from .module import ModuleMacroInvokerMacro
 from .proc import (

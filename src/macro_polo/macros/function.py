@@ -4,9 +4,10 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 import tokenize
 
-from .. import MacroError, Token
+from .. import MacroError
 from ..match import MacroMatch
 from ..parse import parse_macro_matcher, parse_macro_transcriber
+from ..tokens import Token
 from .types import Macro, PartialMatchMacro
 
 

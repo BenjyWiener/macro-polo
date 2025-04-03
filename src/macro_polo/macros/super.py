@@ -2,10 +2,10 @@
 
 from collections.abc import Sequence
 
-from .. import Token, TokenTree
 from .._utils import SliceView, TupleNewType
 from ..match import MacroMatch
 from ..parse import parse_macro_matcher
+from ..tokens import Token, TokenTree
 from .types import Macro, PartialMatchMacro
 
 
