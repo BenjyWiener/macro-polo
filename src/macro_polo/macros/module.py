@@ -49,7 +49,7 @@ class ModuleMacroInvokerMacro(Macro):
     When a module macro is invoked, its name is looked up here.
 
     This mapping may be shared with other macros, such as a
-    :class:`~macro_polo.macros.ImporterMacro`.
+    :class:`~macro_polo.macros.importer.ImporterMacro`.
     """
 
     _invocation_matcher = parse_macro_matcher(

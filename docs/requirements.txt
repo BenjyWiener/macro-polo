@@ -2,5 +2,5 @@ furo
 ruff
 sphinx
 sphinx-autodoc-typehints
-sphinx_inline_tabs
+sphinx_design
 sphinx-toolbox

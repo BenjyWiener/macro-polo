@@ -4,8 +4,8 @@
 
 .. seealso::
 
-    :mod:`macro_polo.macros.macro_rules`
-        API reference for the ``macro_rules`` macros and declaration parser.
+    :class:`macro_polo.macros.macro_rules.MacroRulesParserMacro`
+        API reference for the ``macro_rules`` declaration parser macro.
 
     :mod:`macro_polo.match`
         API reference for the pattern matching machinary used by ``macro_rules``.

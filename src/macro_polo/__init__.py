@@ -38,7 +38,10 @@ class Token(NamedTuple):
 
 
 class TokenTree(TupleNewType[Token]):
-    """A delimited sequence of tokens."""
+    """A delimited sequence of tokens.
+
+    :type args: Token
+    """
 
 
 @dataclass(frozen=True, slots=True)

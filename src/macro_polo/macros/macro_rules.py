@@ -46,7 +46,7 @@ class MacroRulesParserMacro(PartialMatchMacro):
     """Parsed ``macro_rules`` macros will be added to this dict.
 
     It may be shared with other macros, such as a
-    :class:`~macro_polo.macros.FunctionMacroInvokerMacro`.
+    :class:`~macro_polo.macros.function.FunctionMacroInvokerMacro`.
     """
 
     _macro_rules_declaration_matcher = parse_macro_matcher(

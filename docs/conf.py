@@ -16,12 +16,19 @@ author = 'Benjy Wiener'
 
 # -- General configuration ---------------------------------------------------
 
+nitpicky = True
+nitpick_ignore = [
+    # autodoc has trouble with recursive type aliases
+    ('py:class', 'MacroMatcherCapture'),
+]
+
 extensions = [
     'expandmacros',
     'runscript',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
-    'sphinx_inline_tabs',
+    'sphinx.ext.viewcode',
+    'sphinx_design',
     'sphinx_toolbox.more_autodoc.autoprotocol',
 ]
 
@@ -30,7 +37,6 @@ intersphinx_mapping = {
 }
 
 autodoc_typehints = 'description'
-autodoc_class_signature = 'separated'
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
